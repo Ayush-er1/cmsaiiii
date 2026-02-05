@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-context";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { LoginPage } from "@/pages/LoginPage";
+import { CallbackPage } from "@/pages/CallbackPage";
 import { DashboardPage } from "@/pages/DashboardPage";
 import { ProgramsPage } from "@/pages/ProgramsPage";
 import { DepartmentsPage } from "@/pages/DepartmentsPage";
@@ -59,6 +60,7 @@ function Router() {
 
   return (
     <Switch>
+      <Route path="/login/oauth2/code/react-client" component={CallbackPage} />
       <Route path="/login">
         {isAuthenticated ? <Redirect to="/dashboard" /> : <LoginPage />}
       </Route>

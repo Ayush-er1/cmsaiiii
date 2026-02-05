@@ -34,6 +34,7 @@ interface AuthContextType {
   user: AuthUser | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  setAuthUser: (user: AuthUser) => void;
   logout: () => void;
   permissions: RolePermissions;
   updatePermissions: (newPermissions: RolePermissions) => void;
@@ -149,6 +150,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const setAuthUser = (user: AuthUser) => {
+    setUser(user);
+    localStorage.setItem("authUser", JSON.stringify(user));
+  };
+
   const logout = () => {
     setUser(null);
     localStorage.removeItem("authUser");
@@ -159,6 +165,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isAuthenticated: !!user,
       login,
+      setAuthUser,
       logout,
       permissions,
       updatePermissions,
