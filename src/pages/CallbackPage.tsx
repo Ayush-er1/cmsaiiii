@@ -18,8 +18,15 @@ export function CallbackPage() {
 
         const handleCallback = async () => {
             try {
-                const { userinfo } = await exchangeToken();
+                const { tokens, userinfo } = await exchangeToken();
                 console.log("User Info from OIDC:", userinfo);
+
+                if (tokens.access_token) {
+                    localStorage.setItem("access_token", tokens.access_token);
+                }
+                if (tokens.id_token) {
+                    localStorage.setItem("id_token", tokens.id_token);
+                }
 
                 const email = userinfo.email as string;
 
