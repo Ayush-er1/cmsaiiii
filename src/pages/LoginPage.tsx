@@ -1,17 +1,11 @@
 import { useState, useEffect } from "react";
-import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { useAuthCodeFlow } from "@/hooks/auth-hooks";
 
 export function LoginPage() {
-  const [userId, setUserId] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   // const { login } = useAuth(); // Replaced by OIDC flow
   const { toast } = useToast();
@@ -96,49 +90,15 @@ export function LoginPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* 
-                  OIDC typically redirects, so username/password might not be needed HERE 
-                  if the IdP handles it. However, the design usually expects it. 
-                  If this is a "Client-Side" login where we send creds to an API, fields are needed.
-                  But auth-client.ts uses 'authorizationCodeGrant' which implies REDIRECT to an IdP.
-                  So these inputs are technically redundant for the REAL flow, but I will keep them 
-                  visually to not break the design, but maybe disable them or make them optional?
-                  Actually, best UX for OIDC is just a "Login with [Provider]" button.
-                  But to keep the "look", I'll just keep the fields but they won't inherently DO anything 
-                  passed to the hook (unless the hook accepted login_hint).
-              */}
-              <div className="space-y-2 opacity-50 pointer-events-none" title="Managed by Identity Provider">
-                <Label htmlFor="userId" className="sr-only">User ID</Label>
-                <Input
-                  id="userId"
-                  className="h-11 bg-muted/50 border-input"
-                  placeholder="User ID or Email (Managed by IdP)"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                  disabled={true}
-                />
+              <div className="flex flex-col space-y-4">
+                <Button
+                  type="submit"
+                  className="w-full h-11 transition-all shadow-lg shadow-black/5"
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Redirecting to Login..." : "Sign In with SSO"}
+                </Button>
               </div>
-
-              <div className="space-y-2 opacity-50 pointer-events-none">
-                <Label htmlFor="password" className="sr-only">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  className="h-11 bg-muted/50 border-input"
-                  placeholder="Password (Managed by IdP)"
-                  value="********"
-                  disabled={true}
-                  readOnly
-                />
-              </div>
-
-              <Button
-                type="submit"
-                className="w-full h-11 transition-all shadow-lg shadow-black/5"
-                disabled={isLoading}
-              >
-                {isLoading ? "Redirecting to Login..." : "Sign In with SSO"}
-              </Button>
             </form>
 
             <div className="pt-6 border-t border-border">

@@ -3,6 +3,7 @@ import { useTokenExchange } from "@/hooks/auth-hooks";
 import { useAuth, type AuthUser, type UserRole } from "@/lib/auth-context";
 import { useLocation, useRoute } from "wouter";
 import { Loader2 } from "lucide-react";
+import { jwtDecode } from "jwt-decode";
 
 export function CallbackPage() {
     const exchangeToken = useTokenExchange();
@@ -29,14 +30,44 @@ export function CallbackPage() {
                 }
 
                 const email = userinfo.email as string;
-
-                // Simple mapping based on email to preserve demo roles if possible
-                let role: UserRole = "student";
+                let role: UserRole = "student"; // Default fallback
                 let department = "General";
 
-                if (email?.includes("admin")) role = "super_admin";
-                else if (email?.includes("staff")) role = "staff";
-                else if (email?.includes("dept")) role = "admin";
+                // Decode Access Token to find roles
+                if (tokens.access_token) {
+                    try {
+                        const decoded: any = jwtDecode(tokens.access_token);
+                        console.log("Decoded Access Token:", decoded);
+
+                        // Look for roles in common locations
+                        // 1. realm_access.roles (Keycloak)
+                        // 2. roles (Simple JWT)
+                        // 3. resource_access.client.roles
+
+                        let foundRoles: string[] = [];
+
+                        if (decoded.realm_access?.roles) {
+                            foundRoles = decoded.realm_access.roles;
+                        } else if (Array.isArray(decoded.roles)) {
+                            foundRoles = decoded.roles;
+                        } else if (decoded.resource_access?.["react-client"]?.roles) {
+                            foundRoles = decoded.resource_access["react-client"].roles;
+                        }
+
+                        // Map found roles to system roles
+                        // Priority: Super Admin > Admin > Staff > Teacher > Student
+                        const validRoles: UserRole[] = ["super_admin", "admin", "staff", "teacher", "student"];
+
+                        const matchedRole = validRoles.find(r => foundRoles.includes(r));
+
+                        if (matchedRole) {
+                            role = matchedRole;
+                        }
+
+                    } catch (e) {
+                        console.error("Failed to decode token for roles:", e);
+                    }
+                }
 
                 // Construct AuthUser object
                 const user: AuthUser = {
