@@ -58,7 +58,9 @@ export function CallbackPage() {
                         // Priority: Super Admin > Admin > Staff > Teacher > Student
                         const validRoles: UserRole[] = ["super_admin", "admin", "staff", "teacher", "student"];
 
-                        const matchedRole = validRoles.find(r => foundRoles.includes(r));
+                        // Normalize found roles to lowercase for comparison
+                        const normalizedFoundRoles = foundRoles.map(r => r.toLowerCase());
+                        const matchedRole = validRoles.find(r => normalizedFoundRoles.includes(r));
 
                         if (matchedRole) {
                             role = matchedRole;
