@@ -5,27 +5,29 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/lib/theme-context";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
-import { LoginPage } from "@/pages/LoginPage";
-import { CallbackPage } from "@/pages/CallbackPage";
-import { DashboardPage } from "@/pages/DashboardPage";
-import { ProgramsPage } from "@/pages/ProgramsPage";
-import { DepartmentsPage } from "@/pages/DepartmentsPage";
-import { CoursesPage } from "@/pages/CoursesPage";
-import { UsersPage } from "@/pages/UsersPage";
-import { AttendancePage } from "@/pages/AttendancePage";
-import { ResultsPage } from "@/pages/ResultsPage";
-import { StudentReportsPage } from "@/pages/StudentReportsPage";
+import { UserProvider } from "@/lib/user-context";
+import { LoginPage } from "@/pages/auth/LoginPage";
+import { CallbackPage } from "@/pages/auth/CallbackPage";
+import { DashboardPage } from "@/pages/dashboard/DashboardPage";
+import { ProgramsPage } from "@/pages/academics/ProgramsPage";
+import { DepartmentsPage } from "@/pages/academics/DepartmentsPage";
+import { CoursesPage } from "@/pages/academics/CoursesPage";
+import { UsersPage } from "@/pages/administration/UsersPage";
+import { EnrollUserPage } from "@/pages/administration/EnrollUserPage";
+import { AttendancePage } from "@/pages/student-services/AttendancePage";
+import { ResultsPage } from "@/pages/student-services/ResultsPage";
+import { StudentReportsPage } from "@/pages/student-services/StudentReportsPage";
 
-import { ClassRoutinePage } from "@/pages/ClassRoutinePage";
-import { ProfilePage } from "@/pages/ProfilePage";
-import { ChangePasswordPage } from "@/pages/ChangePasswordPage";
-import { FeesPage } from "@/pages/FeesPage";
+import { ClassRoutinePage } from "@/pages/academics/ClassRoutinePage";
+import { ProfilePage } from "@/pages/user/ProfilePage";
+import { ChangePasswordPage } from "@/pages/user/ChangePasswordPage";
+import { FeesPage } from "@/pages/student-services/FeesPage";
 // import { AdminFeesPage } from "@/pages/AdminFeesPage"; // Removed as it's unified
-import { GroupsPage } from "@/pages/GroupsPage";
-import { RolesPermissionsPage } from "@/pages/RolesPermissionsPage";
-import { CalendarPage } from "@/pages/CalendarPage";
-import { ActivityPage } from "@/pages/ActivityPage";
-import NotFound from "@/pages/not-found";
+import { GroupsPage } from "@/pages/administration/GroupsPage";
+import { RolesPermissionsPage } from "@/pages/administration/RolesPermissionsPage";
+import { CalendarPage } from "@/pages/academics/CalendarPage";
+import { ActivityPage } from "@/pages/dashboard/ActivityPage";
+import NotFound from "@/pages/common/not-found";
 
 function ProtectedRoute({
   component: Component,
@@ -82,6 +84,9 @@ function Router() {
       <Route path="/users">
         <ProtectedRoute component={UsersPage} permission="users_view" />
       </Route>
+      <Route path="/users/enroll">
+        <ProtectedRoute component={EnrollUserPage} permission="users_view" />
+      </Route>
       <Route path="/attendance">
         <ProtectedRoute component={AttendancePage} permission="attendance_view" />
       </Route>
@@ -127,10 +132,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <UserProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </UserProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
