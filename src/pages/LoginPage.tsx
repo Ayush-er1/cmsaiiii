@@ -79,7 +79,7 @@ export function LoginPage() {
               <div className="flex flex-col space-y-4">
                 <Button
                   type="submit"
-                  className="w-full h-11 transition-all shadow-lg shadow-black/5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
+                  className="w-full h-11 transition-all shadow-lg shadow-black/5 bg-blue-600 text-white hover:bg-blue-700 dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
                   disabled={isLoading}
                 >
                   {isLoading ? "Redirecting to Login..." : "Log In"}
