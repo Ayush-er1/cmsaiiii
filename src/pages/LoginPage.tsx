@@ -11,21 +11,7 @@ export function LoginPage() {
   const { toast } = useToast();
   const onLogin = useAuthCodeFlow();
 
-  // Force light mode on login page mount
-  useEffect(() => {
-    const root = document.documentElement;
-    const hadDark = root.classList.contains("dark");
-    if (hadDark) {
-      root.classList.remove("dark");
-    }
 
-    // Cleanup: restore dark mode if it was enabled before
-    return () => {
-      if (hadDark) {
-        root.classList.add("dark");
-      }
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,10 +67,10 @@ export function LoginPage() {
                   className="h-12 w-auto object-contain"
                 />
               </div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+              <h1 className="text-2xl font-semibold tracking-tight text-gray-900">
                 Welcome back
               </h1>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-gray-500">
                 Sign in to your account
               </p>
             </div>
@@ -93,27 +79,15 @@ export function LoginPage() {
               <div className="flex flex-col space-y-4">
                 <Button
                   type="submit"
-                  className="w-full h-11 transition-all shadow-lg shadow-black/5"
+                  className="w-full h-11 transition-all shadow-lg shadow-black/5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-900 dark:text-white dark:hover:bg-slate-800"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Redirecting to Login..." : "Sign In with SSO"}
+                  {isLoading ? "Redirecting to Login..." : "Log In"}
                 </Button>
               </div>
             </form>
 
-            <div className="pt-6 border-t border-border">
-              <p className="text-xs text-center text-muted-foreground font-medium uppercase tracking-wider mb-4">
-                Quick Access (Demo)
-              </p>
-              <div className="flex justify-center gap-3">
-                {/* These mock buttons will now just trigger the main SSO flow or could be removed if strict */}
-                {/* Keeping them as requested to "keep all files/logic" implies keeping the PAGE structure too */}
-                <button onClick={() => quickLogin("super_admin")} className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:bg-destructive hover:text-destructive-foreground transition-all flex items-center justify-center font-bold" title="Super Admin">SA</button>
-                <button onClick={() => quickLogin("admin")} className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:bg-blue-600 hover:text-white transition-all flex items-center justify-center font-bold" title="Admin">A</button>
-                <button onClick={() => quickLogin("staff")} className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all flex items-center justify-center font-bold" title="Staff">S</button>
-                <button onClick={() => quickLogin("student")} className="w-10 h-10 rounded-full bg-muted text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-all flex items-center justify-center font-bold" title="Student">St</button>
-              </div>
-            </div>
+
           </div>
         </div>
       </Card>
