@@ -74,7 +74,7 @@ export function CallbackPage() {
                 // Construct AuthUser object
                 const user: AuthUser = {
                     id: userinfo.sub || "unknown",
-                    name: (userinfo.name as string) || "User",
+                    name: (userinfo.name as string) || (userinfo.preferred_username as string) || (userinfo.given_name as string) || (userinfo.nickname as string) || (userinfo.email as string) || "User",
                     email: email || "unknown@example.com",
                     role: role,
                     department: department,
