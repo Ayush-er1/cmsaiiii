@@ -37,9 +37,9 @@ const mockStats = {
     { title: "Staff Members", value: "124", icon: Users },
   ],
   super_admin: [
-    { title: "Total Students", value: "2,847", icon: Users, trend: { value: 12, label: "this semester" } },
+    { title: "Total Students", value: "...", icon: Users, trend: { value: 12, label: "this semester" } },
     { title: "Active Programs", value: "24", icon: GraduationCap, trend: { value: 4, label: "new programs" } },
-    { title: "Courses", value: "186", icon: BookOpen },
+    { title: "Courses", value: "...", icon: BookOpen },
     { title: "Staff Members", value: "124", icon: Users },
   ],
   staff: [
@@ -178,8 +178,14 @@ export function DashboardPage() {
   // Fetch dashboard stats for super_admin
   useEffect(() => {
     if (user?.role === "super_admin") {
+      const token = localStorage.getItem("access_token");
+
       axios
-        .get("http://localhost:8000/api/v1/admin/dashboard")
+        .get("http://localhost:8000/api/v1/admin/dashboard", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
         .then((response) => {
           const { studentCount, courseCount } = response.data;
           setDashboardStats((prev) => ({
