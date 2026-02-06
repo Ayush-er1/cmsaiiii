@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, GraduationCap, BookOpen, ClipboardCheck, TrendingUp, Calendar, FileText, Bell, Plus, Edit, Trash2, ArrowRight, Building, Layers, Check, X, CreditCard } from "lucide-react";
+import axios from "axios";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { StatCard } from "@/components/common/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -157,6 +158,9 @@ export function DashboardPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
+  const [dashboardStats, setDashboardStats] = useState(mockStats);
+
+
   const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<number | null>(null);
@@ -171,9 +175,35 @@ export function DashboardPage() {
     targetGroups: ["all"],
   });
 
+  // Fetch dashboard stats for super_admin
+  useEffect(() => {
+    if (user?.role === "super_admin") {
+      axios
+        .get("http://localhost:8000/api/v1/admin/dashboard")
+        .then((response) => {
+          const { studentCount, courseCount } = response.data;
+          setDashboardStats((prev) => ({
+            ...prev,
+            super_admin: prev.super_admin.map((stat) => {
+              if (stat.title === "Total Students") {
+                return { ...stat, value: String(studentCount) };
+              }
+              if (stat.title === "Courses") {
+                return { ...stat, value: String(courseCount) };
+              }
+              return stat;
+            }),
+          }));
+        })
+        .catch((error) => {
+          console.error("Failed to fetch dashboard stats", error);
+        });
+    }
+  }, [user]);
+
   if (!user) return null;
 
-  const stats = mockStats[user.role as keyof typeof mockStats] || mockStats.admin;
+  const stats = dashboardStats[user.role as keyof typeof dashboardStats] || dashboardStats.admin;
   const isSuperAdmin = user.role === "super_admin";
   const isAdmin = user.role === "admin" || user.role === "super_admin";
   const isStaff = user.role === "staff" || user.role === "teacher";
