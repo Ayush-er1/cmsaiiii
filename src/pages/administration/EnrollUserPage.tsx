@@ -70,8 +70,11 @@ interface StudentFormData {
 
 export function EnrollUserPage() {
     const { user } = useAuth();
-    const { addUser } = useUser();
-    const [, setLocation] = useLocation();
+    const { addUser, updateUser, users } = useUser();
+    const [location, setLocation] = useLocation();
+    // Check if we are in edit mode
+    const match = location.match(/\/users\/([^\/]+)\/edit/);
+    const editingUserId = match ? match[1] : null;
     const { toast } = useToast();
 
     const isSuperAdmin = user?.role === "super_admin";
@@ -160,6 +163,51 @@ export function EnrollUserPage() {
         fileInputRef.current?.click();
     };
 
+    // Load user data if editing
+    import { useEffect as useEffectReact } from "react";
+    useEffectReact(() => {
+        if (editingUserId) {
+            const userToEdit = users.find(u => u.id === editingUserId);
+            if (userToEdit) {
+                const [first, ...last] = userToEdit.name.split(" ");
+                setFirstName(first || "");
+                setLastName(last.join(" ") || "");
+                setUserId(userToEdit.User_Id || "");
+                setEmail(userToEdit.email);
+                // Password usually not populated for security, left blank means unchanged
+
+                setFormData({
+                    role: userToEdit.role,
+                    subRoles: userToEdit.subRoles || [],
+                    department: userToEdit.department,
+                    phone: userToEdit.phone || "",
+                    status: userToEdit.status,
+                });
+
+                if (userToEdit.role === "student") {
+                    setStudentFormData({
+                        universityId: userToEdit.universityId || "",
+                        dateOfBirth: userToEdit.dateOfBirth || "",
+                        gender: userToEdit.gender || "",
+                        currentClass: userToEdit.currentClass || "",
+                        semester: userToEdit.semester || "",
+                        guardianName: userToEdit.guardianName || "",
+                        guardianContact: userToEdit.guardianContact || "",
+                        guardianRelationship: userToEdit.guardianRelationship || "",
+                    });
+                }
+
+                if (userToEdit.avatarUrl) {
+                    setAvatarUpload(userToEdit.avatarUrl);
+                }
+
+                if (userToEdit.documents) {
+                    setNewDocuments(userToEdit.documents);
+                }
+            }
+        }
+    }, [editingUserId, users]);
+
     const getInitials = (name: string) => {
         return name
             .split(" ")
@@ -188,8 +236,10 @@ export function EnrollUserPage() {
             return;
         }
         if (!password.trim() || password.length < 6) {
-            toast({ title: "Password must be at least 6 characters", variant: "destructive" });
-            return;
+            if (!editingUserId) {
+                toast({ title: "Password must be at least 6 characters", variant: "destructive" });
+                return;
+            }
         }
 
         setCurrentStep(2);
@@ -224,7 +274,7 @@ export function EnrollUserPage() {
         const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
         const baseUser = {
-            id: Date.now().toString(),
+            id: editingUserId || Date.now().toString(),
             name: fullName,
             email: email,
             role: formData.role,
@@ -232,7 +282,8 @@ export function EnrollUserPage() {
             phone: formData.phone,
             status: formData.status,
             User_Id: userId,
-            password: password,
+            // Only update password if non-empty in edit mode
+            ...(editingUserId && password.trim() === "" ? {} : { password: password }),
         };
 
         const newUser: UserRecord = formData.role === "student"
@@ -247,13 +298,25 @@ export function EnrollUserPage() {
                 guardianName: studentFormData.guardianName,
                 guardianContact: studentFormData.guardianContact,
                 guardianRelationship: studentFormData.guardianRelationship,
-                enrollmentDate: new Date().toISOString().split("T")[0],
+                enrollmentDate: editingUserId ? (users.find(u => u.id === editingUserId)?.enrollmentDate || new Date().toISOString().split("T")[0]) : new Date().toISOString().split("T")[0],
                 avatarUrl: avatarUpload || undefined,
             }
             : { ...baseUser, subRoles: formData.subRoles, avatarUrl: avatarUpload || undefined, documents: newDocuments };
 
-        addUser(newUser);
-        toast({ title: `${roleLabels[formData.role]} enrolled successfully` });
+        if (editingUserId) {
+            // Keep existing password if not provided
+            if (password.trim() === "") {
+                const existingUser = users.find(u => u.id === editingUserId);
+                if (existingUser) {
+                    newUser.password = existingUser.password;
+                }
+            }
+            updateUser(editingUserId, newUser);
+            toast({ title: "User updated successfully" });
+        } else {
+            addUser(newUser);
+            toast({ title: `${roleLabels[formData.role]} enrolled successfully` });
+        }
         setLocation("/users");
     };
 
@@ -265,8 +328,8 @@ export function EnrollUserPage() {
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold tracking-tight">Enroll New User</h1>
-                        <p className="text-muted-foreground">Complete the steps to add a new user.</p>
+                        <h1 className="text-2xl font-bold tracking-tight">{editingUserId ? "Edit User" : "Enroll New User"}</h1>
+                        <p className="text-muted-foreground">{editingUserId ? "Update user details." : "Complete the steps to add a new user."}</p>
                     </div>
                 </div>
 
@@ -349,7 +412,7 @@ export function EnrollUserPage() {
 
                                 <div className="space-y-2">
                                     <Label htmlFor="enroll-user-password">
-                                        Password <span className="text-destructive">*</span>
+                                        Password {editingUserId ? "(Leave blank to keep current)" : <span className="text-destructive">*</span>}
                                     </Label>
                                     <div className="relative flex items-center max-w-md">
                                         <Input
@@ -734,7 +797,7 @@ export function EnrollUserPage() {
                                                 <ArrowLeft className="h-4 w-4" /> Back
                                             </Button>
                                             <Button onClick={handleSave} className="gap-2 min-w-[150px]">
-                                                <Check className="h-4 w-4" /> Create User
+                                                <Check className="h-4 w-4" /> {editingUserId ? "Update User" : "Create User"}
                                             </Button>
                                         </CardFooter>
                                     </Card>

@@ -57,7 +57,7 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     },
     {
         id: "users",
-        name: "Identity Management",
+        name: "User Management",
         icon: "Users",
         permissions: [
             { id: "users_view", name: "View Users", description: "View all users (admin/staff/student)", action: "view" },

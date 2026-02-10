@@ -14,6 +14,7 @@ import { DepartmentsPage } from "@/pages/academics/DepartmentsPage";
 import { CoursesPage } from "@/pages/academics/CoursesPage";
 import { UsersPage } from "@/pages/administration/UsersPage";
 import { EnrollUserPage } from "@/pages/administration/EnrollUserPage";
+import { UserDetailsPage } from "@/pages/administration/UserDetailsPage";
 import { AttendancePage } from "@/pages/student-services/AttendancePage";
 import { ResultsPage } from "@/pages/student-services/ResultsPage";
 import { StudentReportsPage } from "@/pages/student-services/StudentReportsPage";
@@ -86,6 +87,12 @@ function Router() {
       </Route>
       <Route path="/users/enroll">
         <ProtectedRoute component={EnrollUserPage} permission="users_view" />
+      </Route>
+      <Route path="/users/:id/edit">
+        <ProtectedRoute component={EnrollUserPage} permission="users_view" />
+      </Route>
+      <Route path="/users/:id">
+        <ProtectedRoute component={UserDetailsPage} permission="users_view" />
       </Route>
       <Route path="/attendance">
         <ProtectedRoute component={AttendancePage} permission="attendance_view" />
