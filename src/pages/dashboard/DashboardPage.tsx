@@ -28,79 +28,39 @@ import { useAuth } from "@/lib/auth-context";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
-// todo: remove mock functionality
-const mockStats = {
+// Initial stats with empty values
+const initialStats = {
   admin: [
-    { title: "Total Students", value: "2,847", icon: Users, trend: { value: 12, label: "this semester" } },
-    { title: "Active Programs", value: "24", icon: GraduationCap, trend: { value: 4, label: "new programs" } },
-    { title: "Courses", value: "186", icon: BookOpen },
-    { title: "Staff Members", value: "124", icon: Users },
+    { title: "Total Students", value: "0", icon: Users },
+    { title: "Active Programs", value: "0", icon: GraduationCap },
+    { title: "Courses", value: "0", icon: BookOpen },
+    { title: "Staff Members", value: "0", icon: Users },
   ],
   super_admin: [
-    { title: "Total Students", value: "...", icon: Users, trend: { value: 12, label: "this semester" } },
-    { title: "Active Programs", value: "24", icon: GraduationCap, trend: { value: 4, label: "new programs" } },
-    { title: "Courses", value: "...", icon: BookOpen },
-    { title: "Staff Members", value: "124", icon: Users },
+    { title: "Total Students", value: "0", icon: Users },
+    { title: "Active Programs", value: "0", icon: GraduationCap },
+    { title: "Courses", value: "0", icon: BookOpen },
+    { title: "Staff Members", value: "0", icon: Users },
   ],
   staff: [
-    { title: "My Students", value: "156", icon: Users },
-    { title: "Courses Teaching", value: "4", icon: BookOpen },
-    { title: "Avg. Attendance", value: "87%", icon: ClipboardCheck, trend: { value: 3, label: "vs last month" } },
-    { title: "Pending Grades", value: "28", icon: FileText },
+    { title: "My Students", value: "0", icon: Users },
+    { title: "Courses Teaching", value: "0", icon: BookOpen },
+    { title: "Avg. Attendance", value: "0%", icon: ClipboardCheck },
+    { title: "Pending Grades", value: "0", icon: FileText },
   ],
   student: [
-    { title: "Enrolled Courses", value: "5", icon: BookOpen },
-    { title: "Attendance Rate", value: "92%", icon: ClipboardCheck, trend: { value: 2, label: "this month" } },
-    { title: "Current GPA", value: "3.7", icon: TrendingUp },
-    { title: "Pending Fees", value: "Rs. 243,167", icon: CreditCard },
+    { title: "Enrolled Courses", value: "0", icon: BookOpen },
+    { title: "Attendance Rate", value: "0%", icon: ClipboardCheck },
+    { title: "Current GPA", value: "0.0", icon: TrendingUp },
+    { title: "Pending Fees", value: "Rs. 0", icon: CreditCard },
   ],
   teacher: [
-    { title: "My Students", value: "156", icon: Users },
-    { title: "Courses Teaching", value: "4", icon: BookOpen },
-    { title: "Avg. Attendance", value: "87%", icon: ClipboardCheck, trend: { value: 3, label: "vs last month" } },
-    { title: "Pending Grades", value: "28", icon: FileText },
+    { title: "My Students", value: "0", icon: Users },
+    { title: "Courses Teaching", value: "0", icon: BookOpen },
+    { title: "Avg. Attendance", value: "0%", icon: ClipboardCheck },
+    { title: "Pending Grades", value: "0", icon: FileText },
   ],
 };
-
-const mockRecentActivity = [
-  { id: 1, type: "enrollment", message: "New student enrolled in Computer Science", time: "2 hours ago" },
-  { id: 2, type: "grade", message: "Grades published for CS301 - Database Systems", time: "5 hours ago" },
-  { id: 3, type: "attendance", message: "Attendance marked for Morning Batch", time: "Today, 9:00 AM" },
-  { id: 4, type: "program", message: "New program added: Data Science Masters", time: "Yesterday" },
-];
-
-const mockAnnouncements: Announcement[] = [
-  {
-    id: 1,
-    title: "Semester Registration Open",
-    date: "Dec 15, 2025",
-    content: "Registration for the Spring 2026 semester is now open. Please log in to your student portal to view available courses and complete your registration before the deadline.",
-    targetRoles: ["student", "staff"],
-    targetDepartments: ["all"],
-    targetPrograms: ["all"],
-    targetGroups: ["all"]
-  },
-  {
-    id: 2,
-    title: "Holiday Schedule Update",
-    date: "Dec 14, 2025",
-    content: "The college will be closed from December 24th to January 2nd for the winter holidays. All classes will resume on January 3rd, 2026.",
-    targetRoles: ["all"],
-    targetDepartments: ["all"],
-    targetPrograms: ["all"],
-    targetGroups: ["all"]
-  },
-  {
-    id: 3,
-    title: "Library Hours Extended",
-    date: "Dec 13, 2025",
-    content: "Due to finals week, the library will be open 24/7 from December 16th through December 23rd. Study rooms are available on a first-come, first-served basis.",
-    targetRoles: ["student"],
-    targetDepartments: ["all"],
-    targetPrograms: ["all"],
-    targetGroups: ["all"]
-  },
-];
 
 const availableRoles = [
   { id: "all", label: "All Roles" },
@@ -157,8 +117,9 @@ interface Announcement {
 export function DashboardPage() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [announcements, setAnnouncements] = useState<Announcement[]>(mockAnnouncements);
-  const [dashboardStats, setDashboardStats] = useState(mockStats);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [dashboardStats, setDashboardStats] = useState(initialStats);
+  const [recentActivity, setRecentActivity] = useState<{ id: number; message: string; time: string }[]>([]);
 
 
   const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] = useState(false);
@@ -363,21 +324,27 @@ export function DashboardPage() {
               </CardHeader>
               <CardContent className="p-4">
                 <div className="space-y-4">
-                  {mockRecentActivity.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-start gap-3 pb-3 border-b border-dashed last:border-0 last:pb-0"
-                      data-testid={`activity-item-${activity.id}`}
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#106bc6]/10 text-[#106bc6] flex-shrink-0">
-                        <Bell className="h-4 w-4" />
+                  {recentActivity.length > 0 ? (
+                    recentActivity.map((activity) => (
+                      <div
+                        key={activity.id}
+                        className="flex items-start gap-3 pb-3 border-b border-dashed last:border-0 last:pb-0"
+                        data-testid={`activity-item-${activity.id}`}
+                      >
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#106bc6]/10 text-[#106bc6] flex-shrink-0">
+                          <Bell className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm text-[#1A2E56] dark:text-gray-300">{activity.message}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{activity.time}</p>
+                        </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-[#1A2E56] dark:text-gray-300">{activity.message}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{activity.time}</p>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground text-sm">
+                      No recent activity
                     </div>
-                  ))}
+                  )}
                 </div>
               </CardContent>
             </Card>
