@@ -19,6 +19,8 @@ import { useAuth } from "@/lib/auth-context";
 import { useUser, type UserRecord } from "@/lib/user-context";
 import { ArrowLeft, Camera, X, Upload, FileText, Eye, EyeOff, Check, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
+import { useEffect as useEffectReact } from "react";
+
 
 const departments = [
     "Administration",
@@ -164,7 +166,6 @@ export function EnrollUserPage() {
     };
 
     // Load user data if editing
-    import { useEffect as useEffectReact } from "react";
     useEffectReact(() => {
         if (editingUserId) {
             const userToEdit = users.find(u => u.id === editingUserId);
