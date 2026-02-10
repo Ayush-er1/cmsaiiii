@@ -155,10 +155,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("authUser", JSON.stringify(user));
   };
 
-  const logout = () => {
+  const logout = async () => {
+    const idToken = localStorage.getItem("id_token");
+
+    // Clear local state
     setUser(null);
     localStorage.removeItem("authUser");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("id_token");
+    localStorage.removeItem("code_verifier");
+    localStorage.removeItem("state");
+
+    try {
+      // Get logout URL and redirect
+      const { buildLogoutUrl } = await import("./auth-client");
+      const logoutUrl = await buildLogoutUrl(idToken || undefined);
+      window.location.href = logoutUrl;
+    } catch (error) {
+      console.error("Failed to build logout URL:", error);
+      // Fallback: just reload to ensure state is cleared if redirect fails
+      window.location.href = "/login";
+    }
   };
+
 
   return (
     <AuthContext.Provider value={{

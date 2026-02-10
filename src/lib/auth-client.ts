@@ -97,3 +97,18 @@ export async function userInfo(access_token: string, sub: string) {
     console.log("UserInfo Response", userInfo);
     return userInfo;
 }
+
+export async function buildLogoutUrl(id_token?: string) {
+    const config = await getAuthConfig();
+    const parameters: Record<string, string> = {
+        post_logout_redirect_uri: window.location.origin + "/login",
+    };
+
+    if (id_token) {
+        parameters.id_token_hint = id_token;
+    }
+
+    const logoutUrl = client.buildEndSessionUrl(config, parameters);
+    return logoutUrl.href;
+}
+
