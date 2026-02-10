@@ -38,7 +38,13 @@ export function UsersPage() {
     setError(null);
     try {
       const response = await api.get<UserResponse[]>("/users");
-      setApiUsers(response.data);
+      if (Array.isArray(response.data)) {
+        setApiUsers(response.data);
+      } else {
+        console.warn("API response is not an array:", response.data);
+        setApiUsers([]);
+        setError("Invalid response format from server");
+      }
     } catch (err: any) {
       console.error("Failed to fetch users:", err);
       setError(err.message || "Failed to load users");
@@ -57,11 +63,16 @@ export function UsersPage() {
   }, []);
 
   const filteredUsers = apiUsers.filter((u) => {
+    if (!u) return false;
     const searchLower = search.toLowerCase();
+    const username = u.username?.toLowerCase() || "";
+    const email = u.primaryEmail?.toLowerCase() || "";
+    const id = u.id?.toLowerCase() || "";
+
     return (
-      u.username.toLowerCase().includes(searchLower) ||
-      u.primaryEmail.toLowerCase().includes(searchLower) ||
-      u.id.toLowerCase().includes(searchLower)
+      username.includes(searchLower) ||
+      email.includes(searchLower) ||
+      id.includes(searchLower)
     );
   });
 
@@ -138,18 +149,18 @@ export function UsersPage() {
                 ) : (
                   filteredUsers.map((user, index) => (
                     <TableRow
-                      key={user.id}
+                      key={user.id || index}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => openUserDetails(user.id)}
+                      onClick={() => user.id && openUserDetails(user.id)}
                     >
                       <TableCell>{index + 1}</TableCell>
-                      <TableCell className="font-medium">{user.username}</TableCell>
-                      <TableCell>{user.primaryEmail}</TableCell>
+                      <TableCell className="font-medium">{user.username || "N/A"}</TableCell>
+                      <TableCell>{user.primaryEmail || "N/A"}</TableCell>
                       <TableCell>
                         {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "-"}
                       </TableCell>
                       <TableCell className="font-mono text-xs text-muted-foreground">
-                        {user.id.slice(0, 8)}...
+                        {user.id ? user.id.slice(0, 8) + "..." : "No ID"}
                       </TableCell>
                     </TableRow>
                   ))
