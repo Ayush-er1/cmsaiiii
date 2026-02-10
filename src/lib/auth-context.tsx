@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 import { DEFAULT_ROLE_PERMISSIONS, type RolePermissions } from "./permissions";
+import { signOutRedirect } from "./auth-client";
 
 export type UserRole = "super_admin" | "admin" | "staff" | "student" | "teacher" | "student_council_president" | "student_council_member" | "sports_committee_member";
 
@@ -35,7 +36,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   setAuthUser: (user: AuthUser) => void;
-  logout: () => void;
+  logout: () => void | Promise<void>;
   permissions: RolePermissions;
   updatePermissions: (newPermissions: RolePermissions) => void;
   hasPermission: (permissionId: string) => boolean;
@@ -155,9 +156,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("authUser", JSON.stringify(user));
   };
 
-  const logout = () => {
-    setUser(null);
+  const logout = async () => {
+    const idToken = localStorage.getItem("id_token");
+
+    // Clear local session data
     localStorage.removeItem("authUser");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("id_token");
+    localStorage.removeItem("rolePermissions");
+
+    // Update state
+    setUser(null);
+
+    // Redirect to OIDC provider to end session
+    try {
+      await signOutRedirect(idToken || undefined);
+    } catch (error) {
+      console.error("Failed to sign out redirect:", error);
+    }
   };
 
   return (

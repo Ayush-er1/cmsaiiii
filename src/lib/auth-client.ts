@@ -97,3 +97,25 @@ export async function userInfo(access_token: string, sub: string) {
     console.log("UserInfo Response", userInfo);
     return userInfo;
 }
+
+export async function signOutRedirect(id_token?: string) {
+    const config = await getAuthConfig();
+    const endSessionEndpoint = config.serverMetadata().end_session_endpoint;
+
+    if (!endSessionEndpoint) {
+        console.warn("No end_session_endpoint found in discovery document");
+        return;
+    }
+
+    let url = new URL(endSessionEndpoint);
+    if (id_token) {
+        url.searchParams.set("id_token_hint", id_token);
+    }
+
+    // Optional: post_logout_redirect_uri
+    // We can redirect back to main page or specific logout page
+    url.searchParams.set("post_logout_redirect_uri", window.location.origin);
+
+    console.log("Redirecting to logout:", url.href);
+    window.location.href = url.href;
+}
