@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import api from "@/lib/api";
 import { UserPlus, Search, SeparatorHorizontal, Loader2, RefreshCw } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -36,25 +37,8 @@ export function UsersPage() {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("access_token");
-      const headers: HeadersInit = {
-        "Content-Type": "application/json",
-      };
-      if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-      }
-
-      const response = await fetch("http://localhost:8001/api/v1/users", {
-        method: "GET",
-        headers,
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-
-      const data: UserResponse[] = await response.json();
-      setApiUsers(data);
+      const response = await api.get<UserResponse[]>("/users");
+      setApiUsers(response.data);
     } catch (err: any) {
       console.error("Failed to fetch users:", err);
       setError(err.message || "Failed to load users");
