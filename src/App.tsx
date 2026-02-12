@@ -61,6 +61,28 @@ function ProtectedRoute({
 function Router() {
   const { isAuthenticated } = useAuth();
 
+  const protectedRoutes = [
+    { path: "/dashboard", component: DashboardPage, permission: "dashboard_view" },
+    { path: "/programs", component: ProgramsPage, permission: "programs_view" },
+    { path: "/departments", component: DepartmentsPage, permission: "departments_manage" },
+    { path: "/courses", component: CoursesPage, permission: "courses_view" },
+    { path: "/users", component: UsersPage, permission: "users_view" },
+    { path: "/users/enroll", component: EnrollUserPage, permission: "users_view" },
+    { path: "/users/:id/edit", component: EnrollUserPage, permission: "users_view" },
+    { path: "/users/:id", component: UserDetailsPage, permission: "users_view" },
+    { path: "/attendance", component: AttendancePage, permission: "attendance_view" },
+    { path: "/groups", component: GroupsPage, permission: "groups_manage" },
+    { path: "/roles-permissions", component: RolesPermissionsPage, permission: "permissions_manage" },
+    { path: "/results", component: ResultsPage, permission: "results_view" },
+    { path: "/my-reports", component: StudentReportsPage, permission: "results_view" },
+    { path: "/fees", component: FeesPage, permission: "fees_view" },
+    { path: "/class-routine", component: ClassRoutinePage, permission: "routine_view" },
+    { path: "/profile", component: ProfilePage, permission: "profile_view" },
+    { path: "/change-password", component: ChangePasswordPage, permission: "password_change" },
+    { path: "/calendar", component: CalendarPage, permission: "calendar_view" },
+    { path: "/activity", component: ActivityPage, permission: "dashboard_view" },
+  ];
+
   return (
     <Switch>
       <Route path="/login/oauth2/code/react-client" component={CallbackPage} />
@@ -70,71 +92,20 @@ function Router() {
       <Route path="/">
         {isAuthenticated ? <Redirect to="/dashboard" /> : <Redirect to="/login" />}
       </Route>
-      <Route path="/dashboard">
-        <ProtectedRoute component={DashboardPage} permission="dashboard_view" />
-      </Route>
-      <Route path="/programs">
-        <ProtectedRoute component={ProgramsPage} permission="programs_view" />
-      </Route>
-      <Route path="/departments">
-        <ProtectedRoute component={DepartmentsPage} permission="departments_manage" />
-      </Route>
-      <Route path="/courses">
-        <ProtectedRoute component={CoursesPage} permission="courses_view" />
-      </Route>
-      <Route path="/users">
-        <ProtectedRoute component={UsersPage} permission="users_view" />
-      </Route>
-      <Route path="/users/enroll">
-        <ProtectedRoute component={EnrollUserPage} permission="users_view" />
-      </Route>
-      <Route path="/users/:id/edit">
-        <ProtectedRoute component={EnrollUserPage} permission="users_view" />
-      </Route>
-      <Route path="/users/:id">
-        <ProtectedRoute component={UserDetailsPage} permission="users_view" />
-      </Route>
-      <Route path="/attendance">
-        <ProtectedRoute component={AttendancePage} permission="attendance_view" />
-      </Route>
-      <Route path="/groups">
-        <ProtectedRoute component={GroupsPage} permission="groups_manage" />
-      </Route>
-      <Route path="/roles-permissions">
-        <ProtectedRoute component={RolesPermissionsPage} permission="permissions_manage" />
-      </Route>
-      <Route path="/results">
-        <ProtectedRoute component={ResultsPage} permission="results_view" />
-      </Route>
-      <Route path="/my-reports">
-        <ProtectedRoute component={StudentReportsPage} permission="results_view" />
-      </Route>
 
-      <Route path="/fees">
-        <ProtectedRoute component={FeesPage} permission="fees_view" />
-      </Route>
-      <Route path="/class-routine">
-        <ProtectedRoute component={ClassRoutinePage} permission="routine_view" />
-      </Route>
-      <Route path="/profile">
-        <ProtectedRoute component={ProfilePage} permission="profile_view" />
-      </Route>
-      <Route path="/change-password">
-        <ProtectedRoute component={ChangePasswordPage} permission="password_change" />
-      </Route>
-      <Route path="/calendar">
-        <ProtectedRoute component={CalendarPage} permission="calendar_view" />
-      </Route>
-      <Route path="/activity">
-        <ProtectedRoute component={ActivityPage} permission="dashboard_view" />
-      </Route>
+      {protectedRoutes.map((route) => (
+        <Route key={route.path} path={route.path}>
+          <ProtectedRoute component={route.component} permission={route.permission} />
+        </Route>
+      ))}
+
       <Route component={NotFound} />
-    </Switch >
+    </Switch>
   );
 }
 
 function App() {
-  
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Users, GraduationCap, BookOpen, ClipboardCheck, TrendingUp, Calendar, FileText, Bell, Plus, Edit, Trash2, ArrowRight, Building, Layers, Check, X, CreditCard } from "lucide-react";
-import axios from "axios";
+import api from "@/lib/api";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { StatCard } from "@/components/common/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
-import { buildApiUrl } from "@/lib/env";
 
 // Initial stats with empty values
 // Initial stats with empty values
@@ -141,14 +140,8 @@ export function DashboardPage() {
   // Fetch dashboard stats for super_admin
   useEffect(() => {
     if (user?.role === "super_admin") {
-      const token = localStorage.getItem("access_token");
-
-      axios
-        .get(buildApiUrl("/admin/dashboard"), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+      api
+        .get("/admin/dashboard")
         .then((response) => {
           const { studentCount, courseCount } = response.data;
           setDashboardStats((prev) => ({
@@ -423,119 +416,61 @@ export function DashboardPage() {
           </Card>
         </div>
 
-        {isAdmin && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-                <Link href="/programs">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-programs">
-                    <GraduationCap className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Manage Programs
-                  </Button>
-                </Link>
-                <Link href="/users">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-users">
-                    <Users className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Manage Users
-                  </Button>
-                </Link>
-                <Link href="/attendance">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-attendance">
-                    <ClipboardCheck className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    View Attendance
-                  </Button>
-                </Link>
-                <Link href="/results">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-results">
-                    <FileText className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    View Results
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
+              {(() => {
+                const actions = {
+                  super_admin: [
+                    { label: "Manage Programs", href: "/programs", icon: GraduationCap, testId: "button-quick-programs" },
+                    { label: "Manage Users", href: "/users", icon: Users, testId: "button-quick-users" },
+                    { label: "View Attendance", href: "/attendance", icon: ClipboardCheck, testId: "button-quick-attendance" },
+                    { label: "View Results", href: "/results", icon: FileText, testId: "button-quick-results" },
+                  ],
+                  admin: [
+                    { label: "Manage Programs", href: "/programs", icon: GraduationCap, testId: "button-quick-programs" },
+                    { label: "Manage Users", href: "/users", icon: Users, testId: "button-quick-users" },
+                    { label: "View Attendance", href: "/attendance", icon: ClipboardCheck, testId: "button-quick-attendance" },
+                    { label: "View Results", href: "/results", icon: FileText, testId: "button-quick-results" },
+                  ],
+                  staff: [
+                    { label: "My Courses", href: "/courses", icon: BookOpen, testId: "button-quick-courses" },
+                    { label: "Mark Attendance", href: "/attendance", icon: ClipboardCheck, testId: "button-quick-attendance" },
+                    { label: "Enter Grades", href: "/results", icon: FileText, testId: "button-quick-results" },
+                    { label: "Academic Calendar", href: "/calendar", icon: Calendar, testId: "button-quick-calendar" },
+                  ],
+                  teacher: [
+                    { label: "My Courses", href: "/courses", icon: BookOpen, testId: "button-quick-courses" },
+                    { label: "Mark Attendance", href: "/attendance", icon: ClipboardCheck, testId: "button-quick-attendance" },
+                    { label: "Enter Grades", href: "/results", icon: FileText, testId: "button-quick-results" },
+                    { label: "Academic Calendar", href: "/calendar", icon: Calendar, testId: "button-quick-calendar" },
+                  ],
+                  student: [
+                    { label: "Class Routine", href: "/class-routine", icon: BookOpen, testId: "button-quick-routine" },
+                    { label: "My Attendance", href: "/student-attendance", icon: ClipboardCheck, testId: "button-quick-attendance" },
+                    { label: "My Progress", href: "/my-reports", icon: TrendingUp, testId: "button-quick-reports" },
+                    { label: "Academic Calendar", href: "/calendar", icon: Calendar, testId: "button-quick-calendar" },
+                    { label: "My Fees", href: "/fees", icon: CreditCard, testId: "button-quick-fees" },
+                  ],
+                };
 
-        {isStaff && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-                <Link href="/courses">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-courses">
-                    <BookOpen className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    My Courses
-                  </Button>
-                </Link>
-                <Link href="/attendance">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-attendance">
-                    <ClipboardCheck className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Mark Attendance
-                  </Button>
-                </Link>
-                <Link href="/results">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-results">
-                    <FileText className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Enter Grades
-                  </Button>
-                </Link>
-                <Link href="/calendar">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-calendar">
-                    <Calendar className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Academic Calendar
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                const currentActions = actions[user.role as keyof typeof actions] || actions.student;
 
-        {!isAdmin && !isStaff && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg font-medium">Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-2 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
-                <Link href="/class-routine">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-routine">
-                    <BookOpen className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Class Routine
-                  </Button>
-                </Link>
-                <Link href="/student-attendance">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-attendance">
-                    <ClipboardCheck className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    My Attendance
-                  </Button>
-                </Link>
-                <Link href="/my-reports">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-reports">
-                    <TrendingUp className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    My Progress
-                  </Button>
-                </Link>
-                <Link href="/calendar">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-calendar">
-                    <Calendar className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    Academic Calendar
-                  </Button>
-                </Link>
-                <Link href="/fees">
-                  <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-fees">
-                    <CreditCard className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                    My Fees
-                  </Button>
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+                return currentActions.map((action) => (
+                  <Link key={action.href} href={action.href}>
+                    <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid={action.testId}>
+                      <action.icon className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
+                      {action.label}
+                    </Button>
+                  </Link>
+                ));
+              })()}
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <Dialog open={isAnnouncementDialogOpen} onOpenChange={setIsAnnouncementDialogOpen}>

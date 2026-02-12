@@ -1,7 +1,9 @@
 import * as client from "openid-client";
+import { env } from "./env";
 
-const server = new URL("http://localhost:8001"); // Authorization Server's Issuer Identifier
-const clientId = "react-client"; // Client identifier at the Authorization Server
+const server = new URL(env.authServerUrl || "http://localhost:9000"); // Authorization Server's Issuer Identifier
+const clientId = env.clientId || "react-client"; // Client identifier at the Authorization Server
+const getRedirectUri = () => `${window.location.origin}/login/oauth2/code/react-client`;
 // const clientSecret = 'secret'; // Client Secret
 
 let config: client.Configuration | undefined = undefined;
@@ -9,14 +11,17 @@ let config: client.Configuration | undefined = undefined;
 export async function getAuthConfig() {
     if (config) return config;
 
+    if (!env.authServerUrl) {
+        throw new Error("VITE_AUTH_SERVER_URL is not defined in environment variables");
+    }
+
     return (config = await client.discovery(
         server,
         clientId,
         {
-            authorization_signed_response_alg: "ES256",
             id_token_signed_response_alg: "ES256",
         },
-        undefined,
+        undefined, // clientAuth
         {
             execute: [client.allowInsecureRequests],
             algorithm: "oidc",
@@ -34,8 +39,7 @@ export async function authCodeFlow(
      * Value used in the authorization request as the redirect_uri parameter, this
      * is typically pre-registered at the Authorization Server.
      */
-    // TODO: Make this dynamic based on environment or window.location
-    const redirect_uri = "http://localhost:5173/login/oauth2/code/react-client";
+    const redirect_uri = getRedirectUri();
     const scope = "openid email profile"; // Scope of the access request
     /**
      * PKCE: The following MUST be generated for every redirect to the
@@ -70,7 +74,7 @@ export async function authCodeFlow(
     let redirectTo: URL = client.buildAuthorizationUrl(config, parameters);
 
     // now redirect the user to redirectTo.href
-    
+
     window.location.href = redirectTo.href;
 }
 
@@ -80,21 +84,23 @@ export async function tokenExchange(
     code_verifier: string
 ) {
     const config = await getAuthConfig();
+    const redirect_uri = getRedirectUri();
 
     let tokens: client.TokenEndpointResponse =
         await client.authorizationCodeGrant(config, getCurrentUrl(), {
             pkceCodeVerifier: code_verifier,
             expectedState: state,
+        }, {
+            redirect_uri
         });
 
-    
     return tokens;
 }
 
 export async function userInfo(access_token: string, sub: string) {
     const config = await getAuthConfig();
     let userInfo = await client.fetchUserInfo(config, access_token, sub);
-    
+
     return userInfo;
 }
 
@@ -116,6 +122,6 @@ export async function signOutRedirect(id_token?: string) {
     // We can redirect back to main page or specific logout page
     url.searchParams.set("post_logout_redirect_uri", window.location.origin);
 
-    
+
     window.location.href = url.href;
 }

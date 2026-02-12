@@ -8,11 +8,10 @@ export const env = {
     apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
     backendUrl: import.meta.env.VITE_BACKEND_URL,
     apiTimeout: parseInt(import.meta.env.VITE_API_TIMEOUT),
+
+    // OAuth2/OIDC Configuration
+    authServerUrl: import.meta.env.VITE_AUTH_SERVER_URL,
+    clientId: import.meta.env.VITE_CLIENT_ID,
 };
 
-/**
- * Helper to build full API URLs
- */
-export const buildApiUrl = (endpoint: string): string => {
-    return `${env.apiBaseUrl}${endpoint}`;
-};
+
