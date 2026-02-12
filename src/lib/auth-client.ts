@@ -1,13 +1,16 @@
 import * as client from "openid-client";
 import { env } from "./env";
 
-const server = new URL(env.authServerUrl || "http://localhost:9000"); // Authorization Server's Issuer Identifier
-const clientId = env.clientId || "react-client"; // Client identifier at the Authorization Server
+const server = new URL(env.authServerUrl!); // Authorization Server's Issuer Identifier
+const clientId = env.clientId!; // Client identifier at the Authorization Server
 const getRedirectUri = () => `${window.location.origin}/login/oauth2/code/react-client`;
-// const clientSecret = 'secret'; // Client Secret
 
 let config: client.Configuration | undefined = undefined;
 
+/**
+ * Discovers and returns the OpenID Connect configuration from the server.
+ * Results are cached in the 'config' variable.
+ */
 export async function getAuthConfig() {
     if (config) return config;
 
@@ -29,24 +32,20 @@ export async function getAuthConfig() {
     ));
 }
 
+/**
+ * Initiates the Authorization Code Flow by redirecting the user to the auth server.
+ * Handles PKCE generation and storage.
+ */
 export async function authCodeFlow(
     setState: (state: string) => void,
     setCodeVerifier: (codeVerifier: string) => void
 ) {
     const config = await getAuthConfig();
 
-    /**
-     * Value used in the authorization request as the redirect_uri parameter, this
-     * is typically pre-registered at the Authorization Server.
-     */
     const redirect_uri = getRedirectUri();
-    const scope = "openid email profile"; // Scope of the access request
-    /**
-     * PKCE: The following MUST be generated for every redirect to the
-     * authorization_endpoint. You must store the code_verifier and state in the
-     * end-user session such that it can be recovered as the user gets redirected
-     * from the authorization server back to your application.
-     */
+    const scope = "openid email profile";
+
+    // Generate PKCE values
     const code_verifier = client.randomPKCECodeVerifier();
     setCodeVerifier(code_verifier);
     let code_challenge: string =
@@ -61,10 +60,8 @@ export async function authCodeFlow(
 
     if (!config.serverMetadata().supportsPKCE()) {
         /**
-         * We cannot be sure the server supports PKCE so we're going to use state too.
-         * Use of PKCE is backwards compatible even if the AS doesn't support it which
-         * is why we're using it regardless. Like PKCE, random state must be generated
-         * for every redirect to the authorization_endpoint.
+         * Fallback to state if PKCE is not explicitly supported.
+         * PKCE is still used as it is backwards compatible.
          */
         const state = client.randomState();
         setState(state);
@@ -72,12 +69,12 @@ export async function authCodeFlow(
     }
 
     let redirectTo: URL = client.buildAuthorizationUrl(config, parameters);
-
-    // now redirect the user to redirectTo.href
-
     window.location.href = redirectTo.href;
 }
 
+/**
+ * Exchanges the authorization code for access and ID tokens.
+ */
 export async function tokenExchange(
     getCurrentUrl: (...args: any) => URL,
     state: string,
@@ -97,6 +94,9 @@ export async function tokenExchange(
     return tokens;
 }
 
+/**
+ * Fetches user information using the access token.
+ */
 export async function userInfo(access_token: string, sub: string) {
     const config = await getAuthConfig();
     let userInfo = await client.fetchUserInfo(config, access_token, sub);
@@ -104,6 +104,9 @@ export async function userInfo(access_token: string, sub: string) {
     return userInfo;
 }
 
+/**
+ * Performs a sign-out by redirecting the user to the end_session_endpoint.
+ */
 export async function signOutRedirect(id_token?: string) {
     const config = await getAuthConfig();
     const endSessionEndpoint = config.serverMetadata().end_session_endpoint;
@@ -118,10 +121,8 @@ export async function signOutRedirect(id_token?: string) {
         url.searchParams.set("id_token_hint", id_token);
     }
 
-    // Optional: post_logout_redirect_uri
-    // We can redirect back to main page or specific logout page
+    // Redirect back to application root after logout
     url.searchParams.set("post_logout_redirect_uri", window.location.origin);
-
 
     window.location.href = url.href;
 }

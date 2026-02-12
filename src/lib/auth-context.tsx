@@ -70,6 +70,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("rolePermissions", JSON.stringify(newPermissions));
   };
 
+  /**
+   * Validates if the current user has a specific permission.
+   * Super admins bypass all permission checks.
+   */
   const hasPermission = (permissionId: string) => {
     if (!user) return false;
     if (user.role === "super_admin") return true;
@@ -78,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const rolePerms = permissions[user.role] || [];
     if (rolePerms.includes(permissionId)) return true;
 
-    // Check sub-role permissions
+    // Check sub-role permissions for additional access
     if (user.subRoles && user.subRoles.length > 0) {
       for (const subRole of user.subRoles) {
         const subRolePerms = permissions[subRole] || [];
@@ -89,16 +93,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
+  /**
+   * Placeholder for local login. All production logins must go through OIDC.
+   */
   const login = async (_email: string, _password: string) => {
-    // TODO: Implement real API call or OAuth flow
     throw new Error("Local login not implemented. Please use OAuth login.");
   };
 
+  /**
+   * Updates the authenticated user state and persists it to localStorage.
+   */
   const setAuthUser = (user: AuthUser) => {
     setUser(user);
     localStorage.setItem("authUser", JSON.stringify(user));
   };
 
+  /**
+   * Logs out the user locally and redirects to the OIDC provider's end session endpoint.
+   */
   const logout = async () => {
     const idToken = localStorage.getItem("id_token");
 
@@ -108,14 +120,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("id_token");
     localStorage.removeItem("rolePermissions");
 
-    // Update state
+    // Clear application state
     setUser(null);
 
-    // Redirect to OIDC provider to end session
+    // Redirect to OIDC provider to end global session
     try {
       await signOutRedirect(idToken || undefined);
     } catch (error) {
-      console.error("Failed to sign out redirect:", error);
+      console.error("Failed to initiate sign-out redirect:", error);
     }
   };
 
