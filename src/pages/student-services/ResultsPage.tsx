@@ -38,14 +38,7 @@ interface ResultRecord {
   credits: number;
 }
 
-const mockResults: ResultRecord[] = [
-  { id: "1", User_Id: "STU2024001", studentName: "Emily Parker", course: "Introduction to Programming", courseCode: "CS101", year: "2025", semester: "Fall", grade: "A", score: 92, credits: 4 },
-  { id: "2", User_Id: "STU2024001", studentName: "Emily Parker", course: "Data Structures", courseCode: "CS201", year: "2025", semester: "Fall", grade: "A-", score: 88, credits: 4 },
-  { id: "3", User_Id: "STU2024002", studentName: "James Wilson", course: "Financial Management", courseCode: "MBA501", year: "2025", semester: "Fall", grade: "B+", score: 85, credits: 3 },
-  { id: "4", User_Id: "STU2023015", studentName: "Robert Lee", course: "Thermodynamics", courseCode: "ME301", year: "2025", semester: "Fall", grade: "B", score: 82, credits: 4 },
-  { id: "5", User_Id: "STU2024003", studentName: "Sarah Brown", course: "Introduction to Programming", courseCode: "CS101", year: "2024", semester: "Spring", grade: "A-", score: 89, credits: 4 },
-  { id: "6", User_Id: "STU2024004", studentName: "Michael Davis", course: "Introduction to Programming", courseCode: "CS101", year: "2024", semester: "Fall", grade: "B+", score: 86, credits: 4 },
-];
+const mockResults: ResultRecord[] = [];
 
 const gradeColors: Record<string, string> = {
   "A+": "bg-primary text-primary-foreground",

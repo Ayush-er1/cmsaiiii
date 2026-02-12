@@ -54,157 +54,7 @@ interface Course {
   resources?: { name: string; url: string; type: 'file' | 'link' }[];
 }
 
-const mockCourses: Course[] = [
-  {
-    id: "1",
-    code: "CS101",
-    name: "Introduction to Programming",
-    credits: 4,
-    program: "Bachelor of Computer Science",
-    instructor: "Prof. Michael Chen",
-    syllabus: "cs101_syllabus.pdf",
-    description: "Fundamental programming concepts using Python.",
-    resources: [
-      { name: "Python Cheat Sheet", url: "python_basics.pdf", type: "file" },
-      { name: "Official Documentation", url: "https://docs.python.org", type: "link" }
-    ]
-  },
-  {
-    id: "2",
-    code: "CS201",
-    name: "Data Structures",
-    credits: 4,
-    program: "Bachelor of Computer Science",
-    instructor: "Prof. Michael Chen",
-    syllabus: "cs201_syllabus.pdf",
-    description: "Advanced data structures and algorithms.",
-  },
-  {
-    id: "3",
-    code: "CS301",
-    name: "Database Management Systems",
-    credits: 4,
-    program: "Bachelor of Computer Science",
-    instructor: "Prof. Michael Chen",
-    syllabus: "cs301_syllabus.pdf",
-    description: "Relational database design, SQL, and database administration.",
-  },
-  {
-    id: "4",
-    code: "CS401",
-    name: "Web Development",
-    credits: 3,
-    program: "Bachelor of Computer Science",
-    instructor: "Prof. Michael Chen",
-    description: "Modern web development with React, Node.js, and databases.",
-  },
-  {
-    id: "5",
-    code: "CS501",
-    name: "Artificial Intelligence",
-    credits: 4,
-    program: "Bachelor of Computer Science",
-    instructor: "Prof. Michael Chen",
-    syllabus: "cs501_syllabus.pdf",
-    description: "Machine learning, neural networks, and AI applications.",
-  },
-  {
-    id: "6",
-    code: "MBA501",
-    name: "Financial Management",
-    credits: 3,
-    program: "Master of Business Administration",
-    instructor: "Prof. James Wilson",
-    syllabus: "mba501_syllabus.pdf",
-    description: "Corporate finance and investment analysis.",
-  },
-  {
-    id: "7",
-    code: "MBA502",
-    name: "Strategic Management",
-    credits: 3,
-    program: "Master of Business Administration",
-    instructor: "Dr. Emily Carter",
-    description: "Business strategy formulation and competitive analysis.",
-  },
-  {
-    id: "8",
-    code: "MBA503",
-    name: "Marketing Analytics",
-    credits: 3,
-    program: "Master of Business Administration",
-    instructor: "Prof. Robert Brown",
-    syllabus: "mba503_syllabus.pdf",
-    description: "Data-driven marketing strategies and consumer behavior.",
-  },
-  {
-    id: "9",
-    code: "ME301",
-    name: "Thermodynamics",
-    credits: 4,
-    program: "Bachelor of Mechanical Engineering",
-    instructor: "Dr. Robert Lee",
-    syllabus: "me301_syllabus.pdf",
-    description: "Laws of thermodynamics and applications.",
-  },
-  {
-    id: "10",
-    code: "ME302",
-    name: "Fluid Mechanics",
-    credits: 4,
-    program: "Bachelor of Mechanical Engineering",
-    instructor: "Prof. Jennifer Davis",
-    description: "Principles of fluid statics and dynamics.",
-  },
-  {
-    id: "11",
-    code: "ME401",
-    name: "Machine Design",
-    credits: 4,
-    program: "Bachelor of Mechanical Engineering",
-    instructor: "Dr. Ahmed Khan",
-    syllabus: "me401_syllabus.pdf",
-    description: "Design principles for mechanical components and systems.",
-  },
-  {
-    id: "12",
-    code: "CE201",
-    name: "Structural Analysis",
-    credits: 4,
-    program: "Bachelor of Civil Engineering",
-    instructor: "Prof. Maria Rodriguez",
-    syllabus: "ce201_syllabus.pdf",
-    description: "Analysis of structures under various loading conditions.",
-  },
-  {
-    id: "13",
-    code: "CE301",
-    name: "Geotechnical Engineering",
-    credits: 3,
-    program: "Bachelor of Civil Engineering",
-    instructor: "Dr. William Thompson",
-    description: "Soil mechanics and foundation engineering.",
-  },
-  {
-    id: "14",
-    code: "IT201",
-    name: "Computer Networks",
-    credits: 3,
-    program: "Bachelor of Information Technology",
-    instructor: "Prof. Suman Adhikari",
-    syllabus: "it201_syllabus.pdf",
-    description: "Network protocols, architecture, and security fundamentals.",
-  },
-  {
-    id: "15",
-    code: "IT301",
-    name: "Cloud Computing",
-    credits: 4,
-    program: "Bachelor of Information Technology",
-    instructor: "Dr. Priya Sharma",
-    description: "Cloud platforms, services, and deployment models.",
-  },
-];
+const mockCourses: Course[] = [];
 
 export function CoursesPage() {
   const { user } = useAuth();
@@ -381,19 +231,24 @@ export function CoursesPage() {
     setFormData({ ...formData, syllabus: "" });
   };
 
-  const handleDelete = (id: string) => {
-    setCourses((prev) => prev.filter((c) => c.id !== id));
-    toast({ title: "Course deleted", variant: "destructive" });
+  const getCourseStats = (courseId: string) => {
+    // TODO: Fetch real stats from API
+    return {
+      totalStudents: 0,
+      avgAttendance: "0%",
+      upcomingAssignments: 0,
+      lastClassDate: "-",
+    };
   };
 
   const handleUploadSyllabus = (courseId: string) => {
-    // todo: remove mock functionality - implement real file upload
-    setCourses((prev) =>
-      prev.map((c) =>
-        c.id === courseId ? { ...c, syllabus: `syllabus_${c.code}.pdf` } : c
-      )
-    );
-    toast({ title: "Syllabus uploaded successfully" });
+    // TODO: Implement real file upload
+    toast({ title: "Syllabus upload not implemented yet", variant: "destructive" });
+  };
+
+  const handleDelete = (id: string) => {
+    setCourses((prev) => prev.filter((c) => c.id !== id));
+    toast({ title: "Course deleted", variant: "destructive" });
   };
 
   const openCourseDetails = (course: Course) => {
@@ -401,15 +256,6 @@ export function CoursesPage() {
     setIsSheetOpen(true);
   };
 
-  // Mock stats generation
-  const getCourseStats = (courseId: string) => {
-    return {
-      totalStudents: 45,
-      avgAttendance: "88%",
-      upcomingAssignments: 2,
-      lastClassDate: "2024-03-20",
-    };
-  };
 
   const stats = selectedCourseForSheet ? getCourseStats(selectedCourseForSheet.id) : null;
 

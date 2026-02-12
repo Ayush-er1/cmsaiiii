@@ -20,7 +20,7 @@ export function CallbackPage() {
         const handleCallback = async () => {
             try {
                 const { tokens, userinfo } = await exchangeToken();
-                console.log("User Info from OIDC:", userinfo);
+                
 
                 if (tokens.access_token) {
                     localStorage.setItem("access_token", tokens.access_token);
@@ -37,7 +37,7 @@ export function CallbackPage() {
                 if (tokens.access_token) {
                     try {
                         const decoded: any = jwtDecode(tokens.access_token);
-                        console.log("Decoded Access Token:", decoded);
+                        
 
                         // Look for roles in common locations
                         // 1. realm_access.roles (Keycloak)

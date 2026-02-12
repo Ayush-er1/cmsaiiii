@@ -41,61 +41,9 @@ interface Program {
 }
 
 // Mock data
-const mockPrograms: Program[] = [
-    { id: "1", name: "Bachelor of Computer Science", code: "BCS" },
-    { id: "2", name: "Master of Business Administration", code: "MBA" },
-    { id: "3", name: "Bachelor of Mechanical Engineering", code: "BME" },
-    { id: "4", name: "Bachelor of Civil Engineering", code: "BCE" },
-    { id: "5", name: "Bachelor of Information Technology", code: "BIT" },
-    { id: "6", name: "Master of Computer Applications", code: "MCA" },
-    { id: "7", name: "Bachelor of Electronics Engineering", code: "BEE" },
-    { id: "8", name: "Doctor of Philosophy in Physics", code: "PhD-PHY" },
-];
+const mockPrograms: Program[] = [];
 
-const mockDepartments: Department[] = [
-    {
-        id: "1",
-        name: "Computer Science & IT",
-        code: "CS",
-        programIds: ["1", "5", "6"],
-        createdAt: "2025-01-01",
-    },
-    {
-        id: "2",
-        name: "Business Administration",
-        code: "BUS",
-        programIds: ["2"],
-        createdAt: "2025-01-01",
-    },
-    {
-        id: "3",
-        name: "Mechanical Engineering",
-        code: "ME",
-        programIds: ["3"],
-        createdAt: "2025-01-05",
-    },
-    {
-        id: "4",
-        name: "Civil Engineering",
-        code: "CE",
-        programIds: ["4"],
-        createdAt: "2025-01-10",
-    },
-    {
-        id: "5",
-        name: "Electronics & Communications",
-        code: "ECE",
-        programIds: ["7"],
-        createdAt: "2025-01-15",
-    },
-    {
-        id: "6",
-        name: "Science & Research",
-        code: "SCI",
-        programIds: ["8"],
-        createdAt: "2025-02-01",
-    },
-];
+const mockDepartments: Department[] = [];
 
 
 export function DepartmentsPage() {

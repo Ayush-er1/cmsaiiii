@@ -31,11 +31,7 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
 
-const mockAttendance = [
-    { course: "Introduction to Programming", code: "CS101", present: 28, absent: 2, late: 1, rate: 94 },
-    { course: "Data Structures", code: "CS201", present: 26, absent: 3, late: 2, rate: 90 },
-    { course: "Web Development", code: "CS301", present: 27, absent: 1, late: 3, rate: 93 },
-];
+const mockAttendance: any[] = [];
 
 interface LeaveRequest {
     id: number;
@@ -46,10 +42,7 @@ interface LeaveRequest {
     status: "Pending" | "Approved" | "Rejected";
 }
 
-const mockLeaveRequests: LeaveRequest[] = [
-    { id: 1, type: "Sick Leave", reason: "Viral fever", startDate: "2025-12-10", endDate: "2025-12-12", status: "Approved" },
-    { id: 2, type: "Casual Leave", reason: "Family event", startDate: "2025-12-20", endDate: "2025-12-21", status: "Pending" },
-];
+const mockLeaveRequests: LeaveRequest[] = [];
 
 export function StudentAttendanceView() {
     const { toast } = useToast();

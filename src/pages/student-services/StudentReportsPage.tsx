@@ -11,13 +11,14 @@ import {
 } from "@/components/ui/table";
 
 
-const mockGrades = [
-  { course: "Introduction to Programming", code: "CS101", semester: "Fall 2025", grade: "A", score: 92, credits: 4 },
-  { course: "Data Structures", code: "CS201", semester: "Fall 2025", grade: "A-", score: 88, credits: 4 },
-  { course: "Calculus I", code: "MATH101", semester: "Fall 2024", grade: "B+", score: 86, credits: 4 },
-  { course: "Physics I", code: "PHY101", semester: "Fall 2024", grade: "A", score: 91, credits: 4 },
-  { course: "English Composition", code: "ENG101", semester: "Fall 2024", grade: "A-", score: 89, credits: 3 },
-];
+const mockGrades: {
+  course: string;
+  code: string;
+  semester: string;
+  grade: string;
+  score: number;
+  credits: number;
+}[] = [];
 
 const gradeColors: Record<string, string> = {
   "A+": "bg-primary text-primary-foreground",

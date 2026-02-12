@@ -6,18 +6,8 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
 // Extended mock data for demonstration
-const extendedActivity = [
-    { id: 1, type: "enrollment", message: "New student enrolled in Computer Science", time: "2 hours ago", icon: Info },
-    { id: 2, type: "grade", message: "Grades published for CS301 - Database Systems", time: "5 hours ago", icon: CheckCircle },
-    { id: 3, type: "attendance", message: "Attendance marked for Morning Batch", time: "Today, 9:00 AM", icon: CheckCircle },
-    { id: 4, type: "program", message: "New program added: Data Science Masters", time: "Yesterday", icon: AlertCircle },
-    { id: 5, type: "system", message: "System maintenance scheduled for weekend", time: "2 days ago", icon: Info },
-    { id: 6, type: "user", message: "New staff member registered: Dr. Sarah Smith", time: "3 days ago", icon: Info },
-    { id: 7, type: "enrollment", message: "Student transfer request approved", time: "3 days ago", icon: CheckCircle },
-    { id: 8, type: "grade", message: "Updated grade curve for Physics 101", time: "4 days ago", icon: AlertCircle },
-    { id: 9, type: "attendance", message: "Weekly attendance report generated", time: "Last week", icon: CheckCircle },
-    { id: 10, type: "system", message: "Backup completed successfully", time: "Last week", icon: CheckCircle },
-];
+// Extended mock data for demonstration
+const extendedActivity: { id: number; type: string; message: string; time: string; icon: any }[] = [];
 
 export function ActivityPage() {
     const [filter, setFilter] = useState("");

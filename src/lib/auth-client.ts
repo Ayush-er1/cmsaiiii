@@ -70,7 +70,7 @@ export async function authCodeFlow(
     let redirectTo: URL = client.buildAuthorizationUrl(config, parameters);
 
     // now redirect the user to redirectTo.href
-    console.log("redirecting to", redirectTo.href);
+    
     window.location.href = redirectTo.href;
 }
 
@@ -87,14 +87,14 @@ export async function tokenExchange(
             expectedState: state,
         });
 
-    console.log("Token Endpoint Response", tokens);
+    
     return tokens;
 }
 
 export async function userInfo(access_token: string, sub: string) {
     const config = await getAuthConfig();
     let userInfo = await client.fetchUserInfo(config, access_token, sub);
-    console.log("UserInfo Response", userInfo);
+    
     return userInfo;
 }
 
@@ -116,6 +116,6 @@ export async function signOutRedirect(id_token?: string) {
     // We can redirect back to main page or specific logout page
     url.searchParams.set("post_logout_redirect_uri", window.location.origin);
 
-    console.log("Redirecting to logout:", url.href);
+    
     window.location.href = url.href;
 }

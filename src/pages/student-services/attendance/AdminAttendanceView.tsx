@@ -43,37 +43,12 @@ interface AttendanceRecord {
     status: "present" | "absent" | "late";
 }
 
-const mockStudentAttendance: AttendanceRecord[] = [
-    { id: "1", User_Id: "STU2024001", personName: "Emily Parker", course: "CS101", date: "2025-12-15", status: "present" },
-    { id: "2", User_Id: "STU2024002", personName: "James Wilson", course: "MBA501", date: "2025-12-15", status: "present" },
-    { id: "3", User_Id: "STU2023015", personName: "Robert Lee", course: "ME301", date: "2025-12-15", status: "absent" },
-    { id: "4", User_Id: "STU2024001", personName: "Emily Parker", course: "CS201", date: "2025-12-15", status: "late" },
-    { id: "5", User_Id: "STU2024003", personName: "Sarah Brown", course: "CS101", date: "2025-12-15", status: "present" },
-    { id: "6", User_Id: "STU2024004", personName: "Michael Davis", course: "CS101", date: "2025-12-15", status: "present" },
-];
-
-const mockStaffAttendance: AttendanceRecord[] = [
-    { id: "s1", User_Id: "FAC001", personName: "Prof. Michael Chen", department: "Computer Science", date: "2025-12-15", status: "present" },
-    { id: "s2", User_Id: "FAC002", personName: "Dr. Lisa Wang", department: "Computer Science", date: "2025-12-15", status: "present" },
-    { id: "s3", User_Id: "FAC003", personName: "Prof. James Wilson", department: "Business", date: "2025-12-15", status: "late" },
-    { id: "s4", User_Id: "FAC004", personName: "Dr. Robert Lee", department: "Mechanical Engineering", date: "2025-12-15", status: "present" },
-];
+const mockStudentAttendance: AttendanceRecord[] = [];
+const mockStaffAttendance: AttendanceRecord[] = [];
 
 // Mock Lists for marking
-const mockStudentList = [
-    { User_Id: "STU2024001", name: "Emily Parker", course: "CS101" },
-    { User_Id: "STU2024002", name: "James Wilson", course: "MBA501" },
-    { User_Id: "STU2024003", name: "Sarah Brown", course: "CS101" },
-    { User_Id: "STU2024004", name: "Michael Davis", course: "CS101" },
-    { User_Id: "STU2023015", name: "Robert Lee", course: "ME301" },
-];
-
-const mockStaffList = [
-    { User_Id: "FAC001", name: "Prof. Michael Chen", department: "Computer Science" },
-    { User_Id: "FAC002", name: "Dr. Lisa Wang", department: "Computer Science" },
-    { User_Id: "FAC003", name: "Prof. James Wilson", department: "Business" },
-    { User_Id: "FAC004", name: "Dr. Robert Lee", department: "Mechanical Engineering" },
-];
+const mockStudentList: any[] = [];
+const mockStaffList: any[] = [];
 
 const courses = ["CS101", "CS201", "MBA501", "ME301"];
 const departments = ["Computer Science", "Business", "Mechanical Engineering", "Administration", "IT Support"];
@@ -159,7 +134,7 @@ export function AdminAttendanceView() {
     const handleSaveMarkedAttendance = () => {
         if (markingType === "student") {
             const newRecords: AttendanceRecord[] = Object.entries(studentAttendanceMap).map(([userId, status]) => {
-                const student = mockStudentList.find(s => s.User_Id === userId);
+                const student = mockStudentList.find(s => s.User_Id === userId) || { name: "Unknown" };
                 return {
                     id: `${userId}-${attendanceDate}-${Date.now()}`,
                     User_Id: userId,
@@ -174,7 +149,7 @@ export function AdminAttendanceView() {
             toast({ title: `Attendance marked for ${newRecords.length} students` });
         } else if (markingType === "staff") {
             const newRecords: AttendanceRecord[] = Object.entries(staffAttendanceMap).map(([userId, status]) => {
-                const staff = mockStaffList.find(s => s.User_Id === userId);
+                const staff = mockStaffList.find(s => s.User_Id === userId) || { name: "Unknown", department: "Unknown" };
                 return {
                     id: `${userId}-${attendanceDate}-${Date.now()}`,
                     User_Id: userId,
