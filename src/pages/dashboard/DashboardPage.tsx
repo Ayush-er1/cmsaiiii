@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
+import { buildApiUrl } from "@/lib/env";
 
 // Initial stats with empty values
 // Initial stats with empty values
@@ -143,7 +144,7 @@ export function DashboardPage() {
       const token = localStorage.getItem("access_token");
 
       axios
-        .get("http://localhost:8000/api/v1/admin/dashboard", {
+        .get(buildApiUrl("/admin/dashboard"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
