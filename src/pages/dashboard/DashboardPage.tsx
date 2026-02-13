@@ -28,8 +28,6 @@ import { useAuth } from "@/lib/auth-context";
 import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
-// Initial stats with empty values
-// Initial stats with empty values
 const initialStats = {
   admin: [
     { title: "Total Students", value: "0", icon: Users },

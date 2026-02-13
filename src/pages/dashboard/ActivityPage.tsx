@@ -1,12 +1,10 @@
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Bell, CheckCircle, AlertCircle, Info, Filter } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 
-// Extended mock data for demonstration
-// Extended mock data for demonstration
+
 const extendedActivity: { id: number; type: string; message: string; time: string; icon: any }[] = [];
 
 export function ActivityPage() {
