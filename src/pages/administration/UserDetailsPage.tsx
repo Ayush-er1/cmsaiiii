@@ -76,12 +76,7 @@ export function UserDetailsPage() {
     };
 
     const handleEdit = () => {
-        // For now, we'll just redirect to the Enroll page with edit mode logic if implemented later,
-        // or fallback to the previous behavior. Since the user asked for "whole page", 
-        // we should ideally have an edit page. For now, let's keep it simple.
-        // Given constraints, I'll redirect to a hypothetical edit route or reuse enroll page logic if updated.
-        // But since I haven't updated EnrollUserPage yet, let's just use a placeholder toast or navigate to /users/enroll?edit=true
-        // Actually, I should update EnrollUserPage to support editing.
+
         setLocation(`/users/${user.id}/edit`);
     };
 

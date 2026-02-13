@@ -87,7 +87,6 @@ export function ProgramsPage() {
     department: "",
   });
 
-  // Sheet state
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedProgramForSheet, setSelectedProgramForSheet] = useState<Program | null>(null);
 
@@ -125,7 +124,7 @@ export function ProgramsPage() {
   const openEditDialog = (program: Program) => {
     setFormData({
       level: program.level,
-      degreeType: "", // Will need to extract from name or store separately
+      degreeType: "",
       name: program.name,
       duration: program.duration,
       description: program.description,
@@ -149,7 +148,7 @@ export function ProgramsPage() {
             ? {
               ...p,
               ...formData,
-              disciplines: p.disciplines, // Preserve existing disciplines
+              disciplines: p.disciplines,
               department: formData.department,
             }
             : p

@@ -24,7 +24,6 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 
-// todo: remove mock functionality
 interface ResultRecord {
   id: string;
   User_Id: string;

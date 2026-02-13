@@ -24,7 +24,7 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor to handle common errors (optional but good practice)
+// Response interceptor to handle common errors
 api.interceptors.response.use(
     (response) => {
         return response;

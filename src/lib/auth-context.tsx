@@ -12,10 +12,8 @@ export interface AuthUser {
   subRoles?: string[];
   department?: string;
   avatarUrl?: string;
-  // Staff-specific fields
-  assignedCourses?: string[]; // Course codes that staff teaches
+  assignedCourses?: string[];
   User_Id?: string;
-  // Student-specific fields
   phone?: string;
   universityId?: string;
   dateOfBirth?: string;
@@ -28,7 +26,7 @@ export interface AuthUser {
   enrollmentDate?: string;
   program?: string;
   group?: string;
-  enrolledCourses?: string[]; // Course codes student is enrolled in
+  enrolledCourses?: string[];
 }
 
 interface AuthContextType {

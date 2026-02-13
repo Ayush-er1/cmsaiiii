@@ -10,6 +10,7 @@ export interface UserRecord {
     status: "active" | "inactive";
     phone?: string;
     User_Id?: string;
+
     password?: string; // First-time password set during enrollment
     universityId?: string;
     dateOfBirth?: string;
@@ -20,6 +21,7 @@ export interface UserRecord {
     guardianContact?: string;
     guardianRelationship?: string;
     enrollmentDate?: string;
+
     enrolledCourses?: string[]; // Course codes student is enrolled in
     avatarUrl?: string;
     documents?: {
