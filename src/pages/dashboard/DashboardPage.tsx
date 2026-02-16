@@ -45,13 +45,14 @@ export function DashboardPage() {
     if (user) {
       import("@/lib/api").then((module) => {
         const api = module.default;
-        api.get("/admin/dashboard")
+        api.get("/dashboard")
           .then((response) => {
-            const { studentCount, courseCount } = response.data;
+            const { studentCount, courseCount, programCount } = response.data;
             setDashboardStats((prev) =>
               prev.map((stat) => {
                 if (stat.title === "Total Students") return { ...stat, value: String(studentCount) };
                 if (stat.title === "Courses") return { ...stat, value: String(courseCount) };
+                if (stat.title === "Active Programs") return { ...stat, value: String(programCount) };
                 return stat;
               })
             );
