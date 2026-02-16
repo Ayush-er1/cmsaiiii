@@ -27,7 +27,7 @@ import { FeesPage } from "@/pages/student-services/FeesPage";
 import { GroupsPage } from "@/pages/administration/GroupsPage";
 import { RolesPermissionsPage } from "@/pages/administration/RolesPermissionsPage";
 import { CalendarPage } from "@/pages/academics/CalendarPage";
-import { ActivityPage } from "@/pages/dashboard/ActivityPage";
+
 import NotFound from "@/pages/common/not-found";
 
 function ProtectedRoute({
@@ -125,9 +125,7 @@ function Router() {
       <Route path="/calendar">
         <ProtectedRoute component={CalendarPage} permission="calendar_view" />
       </Route>
-      <Route path="/activity">
-        <ProtectedRoute component={ActivityPage} permission="dashboard_view" />
-      </Route>
+
       <Route component={NotFound} />
     </Switch >
   );

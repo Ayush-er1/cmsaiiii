@@ -16,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
-import { useUser, type UserRecord } from "@/lib/user-context";
 import { ArrowLeft, Camera, X, Upload, FileText, Eye, EyeOff, Check, ChevronRight } from "lucide-react";
 import { useLocation } from "wouter";
 import { useEffect as useEffectReact } from "react";
@@ -72,7 +71,7 @@ interface StudentFormData {
 
 export function EnrollUserPage() {
     const { user } = useAuth();
-    const { addUser, updateUser, users } = useUser();
+    // const { addUser, updateUser, users } = useUser(); // Removed dummy context
     const [location, setLocation] = useLocation();
     // Check if we are in edit mode
     const match = location.match(/\/users\/([^\/]+)\/edit/);
@@ -140,7 +139,7 @@ export function EnrollUserPage() {
                 uploadDate: new Date().toISOString().split('T')[0],
             };
             setNewDocuments(prev => [...prev, newDoc]);
-            toast({ title: "Document added" });
+            toast({ title: "Document added locally (upload not connected)" });
         }
     };
 
@@ -167,47 +166,53 @@ export function EnrollUserPage() {
 
     // Load user data if editing
     useEffectReact(() => {
-        if (editingUserId) {
-            const userToEdit = users.find(u => u.id === editingUserId);
-            if (userToEdit) {
-                const [first, ...last] = userToEdit.name.split(" ");
-                setFirstName(first || "");
-                setLastName(last.join(" ") || "");
-                setUserId(userToEdit.User_Id || "");
-                setEmail(userToEdit.email);
-                // Password usually not populated for security, left blank means unchanged
+        const fetchUserForEdit = async () => {
+            if (editingUserId) {
+                try {
+                    const response = await import("@/lib/api").then(m => m.default.get(`/users/${editingUserId}`));
+                    const userToEdit = response.data;
+                    if (userToEdit) {
+                        // Attempt to map API data back to form. 
+                        // Note: API might not return all these fields effectively if they aren't stored.
+                        // We map what we can.
+                        const nameParts = (userToEdit.username || "").split(" "); // fallback if no name field
+                        setFirstName(nameParts[0] || "");
+                        setLastName(nameParts.slice(1).join(" ") || "");
+                        setUserId(userToEdit.username || ""); // Assuming username is userId
+                        setEmail(userToEdit.primaryEmail || "");
 
-                setFormData({
-                    role: userToEdit.role,
-                    subRoles: userToEdit.subRoles || [],
-                    department: userToEdit.department,
-                    phone: userToEdit.phone || "",
-                    status: userToEdit.status,
-                });
+                        // Set other fields defaults or if available
+                        // These might be missing from the minimal API response
+                        setFormData({
+                            role: userToEdit.role || "student",
+                            subRoles: userToEdit.subRoles || [],
+                            department: userToEdit.department || "",
+                            phone: userToEdit.phone || "",
+                            status: userToEdit.status || "active",
+                        });
 
-                if (userToEdit.role === "student") {
-                    setStudentFormData({
-                        universityId: userToEdit.universityId || "",
-                        dateOfBirth: userToEdit.dateOfBirth || "",
-                        gender: userToEdit.gender || "",
-                        currentClass: userToEdit.currentClass || "",
-                        semester: userToEdit.semester || "",
-                        guardianName: userToEdit.guardianName || "",
-                        guardianContact: userToEdit.guardianContact || "",
-                        guardianRelationship: userToEdit.guardianRelationship || "",
-                    });
-                }
-
-                if (userToEdit.avatarUrl) {
-                    setAvatarUpload(userToEdit.avatarUrl);
-                }
-
-                if (userToEdit.documents) {
-                    setNewDocuments(userToEdit.documents);
+                        // Populate student data if available
+                        if (userToEdit.role === "student") {
+                            setStudentFormData({
+                                universityId: userToEdit.universityId || "",
+                                dateOfBirth: userToEdit.dateOfBirth || "",
+                                gender: userToEdit.gender || "",
+                                currentClass: userToEdit.currentClass || "",
+                                semester: userToEdit.semester || "",
+                                guardianName: userToEdit.guardianName || "",
+                                guardianContact: userToEdit.guardianContact || "",
+                                guardianRelationship: userToEdit.guardianRelationship || "",
+                            });
+                        }
+                    }
+                } catch (err) {
+                    console.error("Failed to load user for editing", err);
+                    toast({ title: "Failed to load user data", variant: "destructive" });
                 }
             }
-        }
-    }, [editingUserId, users]);
+        };
+        fetchUserForEdit();
+    }, [editingUserId]);
 
     const getInitials = (name: string) => {
         return name
@@ -246,7 +251,7 @@ export function EnrollUserPage() {
         setCurrentStep(2);
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         // Validate Step 2
         if (!formData.department && formData.role !== 'super_admin') {
             toast({ title: "Please select a Department", variant: "destructive" });
@@ -274,51 +279,45 @@ export function EnrollUserPage() {
 
         const fullName = `${firstName.trim()} ${lastName.trim()}`;
 
-        const baseUser = {
-            id: editingUserId || Date.now().toString(),
+        // Construct payload
+        // We send a superset of fields. The backend should ignore what it doesn't understand.
+        // Core fields: username, primaryEmail. 
+        // We likely need 'password' for creation.
+        const payload = {
+            username: userId, // Assuming username maps to ID
+            primaryEmail: email,
+            password: password, // Only send if set?
             name: fullName,
-            email: email,
             role: formData.role,
             department: formData.department,
             phone: formData.phone,
             status: formData.status,
-            User_Id: userId,
-            // Only update password if non-empty in edit mode
-            ...(editingUserId && password.trim() === "" ? {} : { password: password }),
+            ...studentFormData,
+            subRoles: formData.subRoles
         };
 
-        const newUser: UserRecord = formData.role === "student"
-            ? {
-                ...baseUser,
-                subRoles: formData.subRoles,
-                universityId: studentFormData.universityId || `UNI${Date.now().toString().slice(-7)}`,
-                dateOfBirth: studentFormData.dateOfBirth,
-                gender: studentFormData.gender as UserRecord["gender"],
-                currentClass: studentFormData.currentClass,
-                semester: studentFormData.semester,
-                guardianName: studentFormData.guardianName,
-                guardianContact: studentFormData.guardianContact,
-                guardianRelationship: studentFormData.guardianRelationship,
-                enrollmentDate: editingUserId ? (users.find(u => u.id === editingUserId)?.enrollmentDate || new Date().toISOString().split("T")[0]) : new Date().toISOString().split("T")[0],
-                avatarUrl: avatarUpload || undefined,
-            }
-            : { ...baseUser, subRoles: formData.subRoles, avatarUrl: avatarUpload || undefined, documents: newDocuments };
+        const api = (await import("@/lib/api")).default;
 
-        if (editingUserId) {
-            // Keep existing password if not provided
-            if (password.trim() === "") {
-                const existingUser = users.find(u => u.id === editingUserId);
-                if (existingUser) {
-                    newUser.password = existingUser.password;
-                }
+        try {
+            if (editingUserId) {
+                // Update
+                if (!password) delete (payload as any).password; // Don't send empty password on update
+                await api.put(`/users/${editingUserId}`, payload);
+                toast({ title: "User updated successfully" });
+            } else {
+                // Create
+                await api.post("/users", payload);
+                toast({ title: `${roleLabels[formData.role]} enrolled successfully` });
             }
-            updateUser(editingUserId, newUser);
-            toast({ title: "User updated successfully" });
-        } else {
-            addUser(newUser);
-            toast({ title: `${roleLabels[formData.role]} enrolled successfully` });
+            setLocation("/users");
+        } catch (err: any) {
+            console.error("Failed to save user:", err);
+            toast({
+                title: "Operation failed",
+                description: err.response?.data?.message || err.message || "Could not save user",
+                variant: "destructive"
+            });
         }
-        setLocation("/users");
     };
 
     return (

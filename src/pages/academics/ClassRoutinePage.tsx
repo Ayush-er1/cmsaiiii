@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +25,7 @@ import { MapPin, User, Plus, Trash2, Edit, Calendar, Filter, X } from "lucide-re
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
+import api from "@/lib/api";
 
 const days = ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
@@ -39,268 +40,16 @@ interface ClassSession {
     startDate: string; // YYYY-MM-DD
     endDate: string; // YYYY-MM-DD
     daysOfWeek: string[]; // e.g., ["Sunday", "Monday"]
-    program: string; // Academic program
+    program: string;
 }
 
-// Store all class sessions in a flat array with comprehensive demo data
-const initialClassSessions: ClassSession[] = [
-    // Sunday classes
-    {
-        id: "1",
-        startTime: "07:00",
-        endTime: "08:30",
-        courseCode: "CIS092-1",
-        courseName: "Fundamentals of Software Engineering",
-        room: "A-201",
-        lecturer: "Anand Gautam",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Sunday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "2",
-        startTime: "09:15",
-        endTime: "10:45",
-        courseCode: "CIS093-1",
-        courseName: "Mathematics and Concepts for Computational Thinking",
-        room: "A-201",
-        lecturer: "Nujan Shrestha",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Sunday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "3",
-        startTime: "11:00",
-        endTime: "12:30",
-        courseCode: "CIS094-1",
-        courseName: "Database Management Systems",
-        room: "B-105",
-        lecturer: "Rajesh Kumar",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Sunday"],
-        program: "Bachelor of Computer Science",
-    },
-    // Monday classes
-    {
-        id: "4",
-        startTime: "07:00",
-        endTime: "08:30",
-        courseCode: "CIS091-1",
-        courseName: "Academic Skills and Team Based Learning",
-        room: "A-201",
-        lecturer: "Lecture Team",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Monday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "5",
-        startTime: "09:15",
-        endTime: "10:45",
-        courseCode: "CIS095-1",
-        courseName: "Object-Oriented Programming",
-        room: "C-303",
-        lecturer: "Priya Sharma",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Monday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "6",
-        startTime: "11:00",
-        endTime: "12:30",
-        courseCode: "CIS096-1",
-        courseName: "Computer Networks",
-        room: "B-204",
-        lecturer: "Suman Adhikari",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Monday"],
-        program: "Bachelor of Computer Science",
-    },
-    // Tuesday classes
-    {
-        id: "7",
-        startTime: "07:00",
-        endTime: "08:30",
-        courseCode: "CIS092-1",
-        courseName: "Fundamentals of Software Engineering",
-        room: "A-201",
-        lecturer: "Anand Gautam",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Tuesday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "8",
-        startTime: "09:15",
-        endTime: "10:45",
-        courseCode: "CIS097-1",
-        courseName: "Web Development",
-        room: "D-101",
-        lecturer: "Binod Thapa",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Tuesday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "9",
-        startTime: "11:00",
-        endTime: "12:30",
-        courseCode: "CIS098-1",
-        courseName: "Operating Systems",
-        room: "C-205",
-        lecturer: "Meera Rai",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Tuesday"],
-        program: "Bachelor of Computer Science",
-    },
-    // Wednesday classes
-    {
-        id: "10",
-        startTime: "07:00",
-        endTime: "08:30",
-        courseCode: "CIS093-1",
-        courseName: "Mathematics and Concepts for Computational Thinking",
-        room: "A-201",
-        lecturer: "Nujan Shrestha",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Wednesday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "11",
-        startTime: "09:15",
-        endTime: "10:45",
-        courseCode: "CIS099-1",
-        courseName: "Data Structures and Algorithms",
-        room: "B-302",
-        lecturer: "Anil Thapa",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Wednesday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "12",
-        startTime: "11:00",
-        endTime: "12:30",
-        courseCode: "CIS100-1",
-        courseName: "Artificial Intelligence",
-        room: "D-201",
-        lecturer: "Deepak Sharma",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Wednesday"],
-        program: "Bachelor of Computer Science",
-    },
-    // Thursday classes
-    {
-        id: "13",
-        startTime: "07:00",
-        endTime: "08:30",
-        courseCode: "CIS095-1",
-        courseName: "Object-Oriented Programming",
-        room: "C-303",
-        lecturer: "Priya Sharma",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Thursday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "14",
-        startTime: "09:15",
-        endTime: "10:45",
-        courseCode: "CIS101-1",
-        courseName: "Mobile Application Development",
-        room: "A-102",
-        lecturer: "Ramesh Gurung",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Thursday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "15",
-        startTime: "11:00",
-        endTime: "12:30",
-        courseCode: "CIS094-1",
-        courseName: "Database Management Systems",
-        room: "B-105",
-        lecturer: "Rajesh Kumar",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Thursday"],
-        program: "Bachelor of Computer Science",
-    },
-    // Friday classes
-    {
-        id: "16",
-        startTime: "07:00",
-        endTime: "08:30",
-        courseCode: "CIS102-1",
-        courseName: "Software Testing and Quality Assurance",
-        room: "C-401",
-        lecturer: "Sarita Lama",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Friday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "17",
-        startTime: "09:15",
-        endTime: "10:45",
-        courseCode: "CIS096-1",
-        courseName: "Computer Networks",
-        room: "B-204",
-        lecturer: "Suman Adhikari",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Friday"],
-        program: "Bachelor of Computer Science",
-    },
-    {
-        id: "18",
-        startTime: "11:00",
-        endTime: "12:30",
-        courseCode: "CIS097-1",
-        courseName: "Web Development",
-        room: "D-101",
-        lecturer: "Binod Thapa",
-        startDate: "2025-07-01",
-        endDate: "2026-01-30",
-        daysOfWeek: ["Friday"],
-        program: "Bachelor of Computer Science",
-    },
-];
-
-// Course reference data for dropdowns
-const availableCourses = [
-    { code: "CIS091-1", name: "Academic Skills and Team Based Learning", lecturer: "Lecture Team", program: "Bachelor of Computer Science" },
-    { code: "CIS092-1", name: "Fundamentals of Software Engineering", lecturer: "Anand Gautam", program: "Bachelor of Computer Science" },
-    { code: "CIS093-1", name: "Mathematics and Concepts for Computational Thinking", lecturer: "Nujan Shrestha", program: "Bachelor of Computer Science" },
-    { code: "CIS094-1", name: "Database Management Systems", lecturer: "Rajesh Kumar", program: "Bachelor of Computer Science" },
-    { code: "CIS095-1", name: "Object-Oriented Programming", lecturer: "Priya Sharma", program: "Bachelor of Computer Science" },
-    { code: "CIS096-1", name: "Computer Networks", lecturer: "Suman Adhikari", program: "Bachelor of Computer Science" },
-    { code: "CIS097-1", name: "Web Development", lecturer: "Binod Thapa", program: "Bachelor of Computer Science" },
-    { code: "CIS098-1", name: "Operating Systems", lecturer: "Meera Rai", program: "Bachelor of Computer Science" },
-    { code: "CIS099-1", name: "Data Structures and Algorithms", lecturer: "Anil Thapa", program: "Bachelor of Computer Science" },
-    { code: "CIS100-1", name: "Artificial Intelligence", lecturer: "Deepak Sharma", program: "Bachelor of Computer Science" },
-    { code: "CIS101-1", name: "Mobile Application Development", lecturer: "Ramesh Gurung", program: "Bachelor of Computer Science" },
-    { code: "CIS102-1", name: "Software Testing and Quality Assurance", lecturer: "Sarita Lama", program: "Bachelor of Computer Science" },
-];
+interface Course {
+    id: string;
+    code: string;
+    name: string;
+    lecturer: string;
+    program: string;
+}
 
 export function ClassRoutinePage() {
     const { user } = useAuth();
@@ -328,7 +77,9 @@ export function ClassRoutinePage() {
     const [selectedDay, setSelectedDay] = useState("Sunday");
     const [selectedProgram, setSelectedProgram] = useState(studentProgram);
     const [showFilters, setShowFilters] = useState(false);
-    const [classSessions, setClassSessions] = useState<ClassSession[]>(initialClassSessions);
+    const [classSessions, setClassSessions] = useState<ClassSession[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [loading, setLoading] = useState(true);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingSessionId, setEditingSessionId] = useState<string | null>(null);
     const [newSession, setNewSession] = useState<Partial<ClassSession>>({
@@ -344,8 +95,40 @@ export function ClassRoutinePage() {
         program: "",
     });
 
-    // Get unique programs from class sessions
-    const programs = Array.from(new Set(classSessions.map(s => s.program)));
+    useEffect(() => {
+        const fetchInitialData = async () => {
+            setLoading(true);
+            try {
+                // Fetch both sessions and courses (assuming endpoints exist)
+                // If endpoints fail (404), handle gracefully if possible, or assume they exist based on task.
+                const [sessionsRes, coursesRes] = await Promise.all([
+                    api.get<ClassSession[]>('/class-sessions').catch(() => ({ data: [] })),
+                    api.get<Course[]>('/courses').catch(() => ({ data: [] }))
+                ]);
+
+                // If the responses are valid arrays, set them
+                if (Array.isArray(sessionsRes.data)) {
+                    setClassSessions(sessionsRes.data);
+                }
+                if (Array.isArray(coursesRes.data)) {
+                    setCourses(coursesRes.data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                toast({ title: "Failed to load class schedule", variant: "destructive" });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchInitialData();
+    }, [toast]);
+
+    // Get unique programs from class sessions and courses
+    const programs = Array.from(new Set([
+        ...classSessions.map(s => s.program),
+        ...courses.map(c => c.program)
+    ])).filter(Boolean).sort();
 
     // Filter sessions for the selected day, program, and check if they're currently active
     const getSessionsForDay = (day: string) => {
@@ -377,70 +160,75 @@ export function ClassRoutinePage() {
         setIsDialogOpen(true);
     };
 
-    const handleAddSession = () => {
+    const handleAddSession = async () => {
         if (!newSession.startTime || !newSession.endTime || !newSession.courseName ||
             !newSession.startDate || !newSession.endDate || !newSession.daysOfWeek?.length || !newSession.program) {
             toast({ title: "Please fill in all required fields including program, days and dates", variant: "destructive" });
             return;
         }
 
-        if (editingSessionId) {
-            // Update existing session
-            const updatedSession: ClassSession = {
-                id: editingSessionId,
-                startTime: newSession.startTime!,
-                endTime: newSession.endTime!,
-                courseCode: newSession.courseCode || "N/A",
-                courseName: newSession.courseName!,
-                room: newSession.room || "TBD",
-                lecturer: newSession.lecturer || "TBD",
-                startDate: newSession.startDate!,
-                endDate: newSession.endDate!,
-                daysOfWeek: newSession.daysOfWeek!,
-                program: newSession.program!,
-            };
+        try {
+            if (editingSessionId) {
+                // Update existing session
+                const updatedData = {
+                    ...newSession,
+                    // Ensure mandatory fields for TS if partial
+                    courseCode: newSession.courseCode || "N/A",
+                    room: newSession.room || "TBD",
+                    lecturer: newSession.lecturer || "TBD",
+                };
 
-            setClassSessions(prev => prev.map(s => s.id === editingSessionId ? updatedSession : s));
-            toast({ title: "Class schedule updated successfully" });
-        } else {
-            // Create new session
-            const session: ClassSession = {
-                id: Date.now().toString(),
-                startTime: newSession.startTime!,
-                endTime: newSession.endTime!,
-                courseCode: newSession.courseCode || "N/A",
-                courseName: newSession.courseName!,
-                room: newSession.room || "TBD",
-                lecturer: newSession.lecturer || "TBD",
-                startDate: newSession.startDate!,
-                endDate: newSession.endDate!,
-                daysOfWeek: newSession.daysOfWeek!,
-                program: newSession.program!,
-            };
+                const response = await api.put<ClassSession>(`/class-sessions/${editingSessionId}`, updatedData);
+                const updatedSession = response.data;
 
-            setClassSessions(prev => [...prev, session]);
-            toast({ title: "Class schedule created successfully" });
+                setClassSessions(prev => prev.map(s => s.id === editingSessionId ? updatedSession : s));
+                toast({ title: "Class schedule updated successfully" });
+            } else {
+                // Create new session
+                const sessionData = {
+                    ...newSession,
+                    courseCode: newSession.courseCode || "N/A",
+                    room: newSession.room || "TBD",
+                    lecturer: newSession.lecturer || "TBD",
+                };
+
+                const response = await api.post<ClassSession>('/class-sessions', sessionData);
+                const session = response.data;
+
+                setClassSessions(prev => [...prev, session]);
+                toast({ title: "Class schedule created successfully" });
+            }
+
+            setIsDialogOpen(false);
+            setEditingSessionId(null);
+            setNewSession({
+                startTime: "",
+                endTime: "",
+                courseCode: "",
+                courseName: "",
+                room: "",
+                lecturer: "",
+                startDate: "",
+                endDate: "",
+                daysOfWeek: [],
+                program: "",
+            });
+        } catch (error) {
+            console.error("Failed to save session:", error);
+            toast({ title: "Failed to save class session", variant: "destructive" });
         }
-
-        setIsDialogOpen(false);
-        setEditingSessionId(null);
-        setNewSession({
-            startTime: "",
-            endTime: "",
-            courseCode: "",
-            courseName: "",
-            room: "",
-            lecturer: "",
-            startDate: "",
-            endDate: "",
-            daysOfWeek: [],
-            program: "",
-        });
     };
 
-    const handleDeleteSession = (sessionId: string) => {
-        setClassSessions(prev => prev.filter(s => s.id !== sessionId));
-        toast({ title: "Class removed" });
+    const handleDeleteSession = async (sessionId: string) => {
+        if (!confirm("Are you sure you want to remove this class?")) return;
+        try {
+            await api.delete(`/class-sessions/${sessionId}`);
+            setClassSessions(prev => prev.filter(s => s.id !== sessionId));
+            toast({ title: "Class removed" });
+        } catch (error) {
+            console.error("Failed to delete sesson:", error);
+            toast({ title: "Failed to remove class", variant: "destructive" });
+        }
     };
 
     const toggleDaySelection = (day: string) => {
@@ -511,7 +299,7 @@ export function ClassRoutinePage() {
                                                 <Select
                                                     value={newSession.courseCode}
                                                     onValueChange={(code) => {
-                                                        const course = availableCourses.find(c => c.code === code);
+                                                        const course = courses.find(c => c.code === code);
                                                         if (course) {
                                                             setNewSession({
                                                                 ...newSession,
@@ -526,7 +314,7 @@ export function ClassRoutinePage() {
                                                         <SelectValue placeholder="Select course code" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {availableCourses
+                                                        {courses
                                                             .filter(c => !newSession.program || c.program === newSession.program)
                                                             .map((course) => (
                                                                 <SelectItem key={course.code} value={course.code}>
@@ -541,7 +329,7 @@ export function ClassRoutinePage() {
                                                 <Select
                                                     value={newSession.courseName}
                                                     onValueChange={(name) => {
-                                                        const course = availableCourses.find(c => c.name === name);
+                                                        const course = courses.find(c => c.name === name);
                                                         if (course) {
                                                             setNewSession({
                                                                 ...newSession,
@@ -556,7 +344,7 @@ export function ClassRoutinePage() {
                                                         <SelectValue placeholder="Select course name" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {availableCourses
+                                                        {courses
                                                             .filter(c => !newSession.program || c.program === newSession.program)
                                                             .map((course) => (
                                                                 <SelectItem key={course.name} value={course.name}>

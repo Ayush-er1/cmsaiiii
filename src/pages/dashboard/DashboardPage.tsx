@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Users, GraduationCap, BookOpen, ClipboardCheck, TrendingUp, Calendar, FileText, Bell, Plus, Edit, Trash2, ArrowRight, Building, Layers, Check, X, CreditCard } from "lucide-react";
-import axios from "axios";
+
 import { MainLayout } from "@/components/layout/MainLayout";
 import { StatCard } from "@/components/common/StatCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -29,38 +29,12 @@ import { Link } from "wouter";
 import { cn } from "@/lib/utils";
 
 // Initial stats with empty values
-const initialStats = {
-  admin: [
-    { title: "Total Students", value: "0", icon: Users },
-    { title: "Active Programs", value: "0", icon: GraduationCap },
-    { title: "Courses", value: "0", icon: BookOpen },
-    { title: "Staff Members", value: "0", icon: Users },
-  ],
-  super_admin: [
-    { title: "Total Students", value: "0", icon: Users },
-    { title: "Active Programs", value: "0", icon: GraduationCap },
-    { title: "Courses", value: "0", icon: BookOpen },
-    { title: "Staff Members", value: "0", icon: Users },
-  ],
-  staff: [
-    { title: "My Students", value: "0", icon: Users },
-    { title: "Courses Teaching", value: "0", icon: BookOpen },
-    { title: "Avg. Attendance", value: "0%", icon: ClipboardCheck },
-    { title: "Pending Grades", value: "0", icon: FileText },
-  ],
-  student: [
-    { title: "Enrolled Courses", value: "0", icon: BookOpen },
-    { title: "Attendance Rate", value: "0%", icon: ClipboardCheck },
-    { title: "Current GPA", value: "0.0", icon: TrendingUp },
-    { title: "Pending Fees", value: "Rs. 0", icon: CreditCard },
-  ],
-  teacher: [
-    { title: "My Students", value: "0", icon: Users },
-    { title: "Courses Teaching", value: "0", icon: BookOpen },
-    { title: "Avg. Attendance", value: "0%", icon: ClipboardCheck },
-    { title: "Pending Grades", value: "0", icon: FileText },
-  ],
-};
+const initialStats = [
+  { title: "Total Students", value: "0", icon: Users },
+  { title: "Active Programs", value: "0", icon: GraduationCap },
+  { title: "Courses", value: "0", icon: BookOpen },
+  { title: "Total Users", value: "0", icon: Users },
+];
 
 const availableRoles = [
   { id: "all", label: "All Roles" },
@@ -119,7 +93,7 @@ export function DashboardPage() {
   const { toast } = useToast();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [dashboardStats, setDashboardStats] = useState(initialStats);
-  const [recentActivity, setRecentActivity] = useState<{ id: number; message: string; time: string }[]>([]);
+
 
 
   const [isAnnouncementDialogOpen, setIsAnnouncementDialogOpen] = useState(false);
@@ -137,40 +111,33 @@ export function DashboardPage() {
   });
 
   // Fetch dashboard stats for super_admin
+  // Fetch dashboard stats for super_admin and admin
+  // Fetch dashboard stats for everyone
   useEffect(() => {
-    if (user?.role === "super_admin") {
-      const token = localStorage.getItem("access_token");
-
-      axios
-        .get("http://localhost:8000/api/v1/admin/dashboard", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          const { studentCount, courseCount } = response.data;
-          setDashboardStats((prev) => ({
-            ...prev,
-            super_admin: prev.super_admin.map((stat) => {
-              if (stat.title === "Total Students") {
-                return { ...stat, value: String(studentCount) };
-              }
-              if (stat.title === "Courses") {
-                return { ...stat, value: String(courseCount) };
-              }
-              return stat;
-            }),
-          }));
-        })
-        .catch((error) => {
-          console.error("Failed to fetch dashboard stats", error);
-        });
+    if (user) {
+      import("@/lib/api").then((module) => {
+        const api = module.default;
+        api.get("/admin/dashboard")
+          .then((response) => {
+            const { studentCount, courseCount } = response.data;
+            setDashboardStats((prev) =>
+              prev.map((stat) => {
+                if (stat.title === "Total Students") return { ...stat, value: String(studentCount) };
+                if (stat.title === "Courses") return { ...stat, value: String(courseCount) };
+                return stat;
+              })
+            );
+          })
+          .catch((error) => {
+            console.error("Failed to fetch dashboard stats", error);
+          });
+      });
     }
   }, [user]);
 
   if (!user) return null;
 
-  const stats = dashboardStats[user.role as keyof typeof dashboardStats] || dashboardStats.admin;
+  const stats = dashboardStats;
   const isSuperAdmin = user.role === "super_admin";
   const isAdmin = user.role === "admin" || user.role === "super_admin";
   const isStaff = user.role === "staff" || user.role === "teacher";
@@ -273,11 +240,7 @@ export function DashboardPage() {
                 <Calendar className="h-4 w-4 ml-[5px] sm:ml-0" />
                 <span>{new Date().toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}</span>
               </div>
-              <div className="hidden sm:block w-px h-3 bg-[#243F76]/20 dark:bg-border" />
-              <div className="flex items-center gap-1.5">
-                <primaryStat.icon className="h-4 w-4 ml-[5px] sm:ml-0" />
-                <span><span className="font-semibold">{primaryStat.value}</span> {primaryStat.title}</span>
-              </div>
+
             </div>
           </div>
 
@@ -303,54 +266,8 @@ export function DashboardPage() {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
-          {(isAdmin || isStaff) && (
-            <Card className="bg-white dark:bg-zinc-900 border-[#243F76]/10 dark:border-white/10 shadow-sm overflow-hidden">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 bg-muted/20 border-b border-[#243F76]/5 dark:border-white/5">
-                <CardTitle className="text-xs font-bold text-[#1A2E56] dark:text-white uppercase tracking-wider flex items-center gap-2">
-                  <Bell className="h-4 w-4 text-[#106bc6]" />
-                  Recent Activity
-                </CardTitle>
-                <Link href="/activity">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 px-2 text-[#106bc6] border-[#106bc6]/20 bg-[#106bc6]/10 hover:bg-[#106bc6] hover:text-white font-bold text-[10px] transition-all"
-                    data-testid="button-view-all-activity"
-                  >
-                    VIEW ALL
-                  </Button>
-                </Link>
-              </CardHeader>
-              <CardContent className="p-4">
-                <div className="space-y-4">
-                  {recentActivity.length > 0 ? (
-                    recentActivity.map((activity) => (
-                      <div
-                        key={activity.id}
-                        className="flex items-start gap-3 pb-3 border-b border-dashed last:border-0 last:pb-0"
-                        data-testid={`activity-item-${activity.id}`}
-                      >
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#106bc6]/10 text-[#106bc6] flex-shrink-0">
-                          <Bell className="h-4 w-4" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm text-[#1A2E56] dark:text-gray-300">{activity.message}</p>
-                          <p className="text-[10px] text-muted-foreground mt-0.5">{activity.time}</p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      No recent activity
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className={cn("bg-white dark:bg-zinc-900 border-[#243F76]/10 dark:border-white/10 shadow-sm overflow-hidden", !(isAdmin || isStaff) ? "lg:col-span-2" : "")}>
+        <div className="grid gap-6 grid-cols-1">
+          <Card className={cn("bg-white dark:bg-zinc-900 border-[#243F76]/10 dark:border-white/10 shadow-sm overflow-hidden", "w-full")}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 p-4 pb-3 bg-muted/20 border-b border-[#243F76]/5 dark:border-white/5">
               <CardTitle className="text-xs font-bold text-[#1A2E56] dark:text-white uppercase tracking-wider flex items-center gap-2">
                 <ClipboardCheck className="h-4 w-4 text-[#106bc6]" />

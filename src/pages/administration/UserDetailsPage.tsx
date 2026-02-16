@@ -1,4 +1,4 @@
-import { useRef, ChangeEvent } from "react";
+import { useRef, ChangeEvent, useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/lib/auth-context";
-import { useUser, type UserRecord } from "@/lib/user-context";
-import { ArrowLeft, Edit, Trash2, Camera, Mail, Phone, MapPin, Calendar, FileText, Download, X, Upload } from "lucide-react";
+import api from "@/lib/api";
+import { ArrowLeft, Edit, Trash2, Camera, Mail, Phone, MapPin, Calendar, FileText, Download, X, Upload, Loader2 } from "lucide-react";
 import { useLocation, useRoute } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
@@ -33,30 +33,77 @@ const roleColors: Record<string, string> = {
     sports_committee_member: "bg-emerald-500 text-white",
 };
 
+// Define structure based on available API data + potential extended data
+interface UserDetail {
+    id: string;
+    username: string;
+    primaryEmail: string;
+    createdAt?: string;
+    // Optional fields that might be supported later or mapped
+    role?: string;
+    department?: string;
+    status?: string;
+    phone?: string;
+    User_Id?: string;
+    avatarUrl?: string;
+    subRoles?: string[];
+    // Student specific
+    universityId?: string;
+    dateOfBirth?: string;
+    gender?: string;
+    currentClass?: string;
+    semester?: string;
+    guardianName?: string;
+    guardianContact?: string;
+    guardianRelationship?: string;
+    enrollmentDate?: string;
+    documents?: any[];
+}
+
 export function UserDetailsPage() {
     const { user: currentUser } = useAuth();
-    const { getUser, updateUser, deleteUser } = useUser();
     const [, params] = useRoute("/users/:id");
     const [, setLocation] = useLocation();
     const { toast } = useToast();
 
-    const userId = params?.id;
-    const user = userId ? getUser(userId) : undefined;
+    const [user, setUser] = useState<UserDetail | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
+    const userId = params?.id;
     const isSelf = currentUser?.id === userId;
     const canEdit = currentUser?.role === "super_admin" || currentUser?.role === "admin";
     const documentInputRef = useRef<HTMLInputElement>(null);
 
-    if (!user) {
-        return (
-            <MainLayout title="User Details">
-                <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
-                    <p className="text-muted-foreground">User not found</p>
-                    <Button onClick={() => setLocation("/users")}>Back to Users</Button>
-                </div>
-            </MainLayout>
-        );
-    }
+    useEffect(() => {
+        const fetchUser = async () => {
+            if (!userId) return;
+            setLoading(true);
+            try {
+                // Try fetching specific user. If backend doesn't support /users/:id, we might need a workaround,
+                // but standard REST pattern implies this.
+                // If the list endpoint returns sparse data, this detail endpoint usually returns full data.
+                const response = await api.get<UserDetail>(`/users/${userId}`);
+                setUser(response.data);
+            } catch (err: any) {
+                console.error("Failed to fetch user details:", err);
+
+                // Fallback: If individual fetch fails (maybe strict CORS or not impl), 
+                // try finding in list? No, that's inefficient. 
+                // Assume 404 means not found.
+                setError(err.message || "Failed to fetch user details");
+                toast({
+                    title: "Error",
+                    description: "Could not load user details.",
+                    variant: "destructive",
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUser();
+    }, [userId, toast]);
 
     const getInitials = (name: string) => {
         return name
@@ -67,22 +114,28 @@ export function UserDetailsPage() {
             .slice(0, 2);
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
+        if (!user) return;
         if (confirm("Are you sure you want to delete this user? This action cannot be undone.")) {
-            deleteUser(user.id);
-            toast({ title: "User deleted successfully" });
-            setLocation("/users");
+            try {
+                await api.delete(`/users/${user.id}`);
+                toast({ title: "User deleted successfully" });
+                setLocation("/users");
+            } catch (err: any) {
+                console.error("Failed to delete user:", err);
+                toast({
+                    title: "Delete failed",
+                    description: err.message || "Could not delete user",
+                    variant: "destructive"
+                });
+            }
         }
     };
 
     const handleEdit = () => {
-        // For now, we'll just redirect to the Enroll page with edit mode logic if implemented later,
-        // or fallback to the previous behavior. Since the user asked for "whole page", 
-        // we should ideally have an edit page. For now, let's keep it simple.
-        // Given constraints, I'll redirect to a hypothetical edit route or reuse enroll page logic if updated.
-        // But since I haven't updated EnrollUserPage yet, let's just use a placeholder toast or navigate to /users/enroll?edit=true
-        // Actually, I should update EnrollUserPage to support editing.
-        setLocation(`/users/${user.id}/edit`);
+        if (user) {
+            setLocation(`/users/${user.id}/edit`);
+        }
     };
 
     const triggerDocumentInput = () => {
@@ -90,29 +143,39 @@ export function UserDetailsPage() {
     };
 
     const handleDocumentUpload = (e: ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            const newDoc = {
-                id: Date.now().toString(),
-                name: file.name,
-                type: file.type,
-                size: (file.size / 1024 / 1024).toFixed(2) + " MB",
-                uploadDate: new Date().toISOString().split('T')[0],
-            };
-
-            updateUser(user.id, {
-                documents: [...(user.documents || []), newDoc]
-            });
-            toast({ title: "Document uploaded successfully" });
-        }
+        // Placeholder for future implementation
+        toast({ title: "Document upload not supported by backend yet.", variant: "default" });
     };
 
     const deleteDocument = (docId: string) => {
-        updateUser(user.id, {
-            documents: user.documents?.filter(d => d.id !== docId)
-        });
-        toast({ title: "Document removed" });
+        // Placeholder
+        toast({ title: "Document deletion not supported by backend yet.", variant: "default" });
     };
+
+    if (loading) {
+        return (
+            <MainLayout title="User Details">
+                <div className="flex items-center justify-center h-[50vh]">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                </div>
+            </MainLayout>
+        );
+    }
+
+    if (error || !user) {
+        return (
+            <MainLayout title="User Details">
+                <div className="flex flex-col items-center justify-center h-[50vh] gap-4">
+                    <p className="text-muted-foreground">{error || "User not found"}</p>
+                    <Button onClick={() => setLocation("/users")}>Back to Users</Button>
+                </div>
+            </MainLayout>
+        );
+    }
+
+    // Default values for missing fields since API is sparse
+    const displayRole = user.role || "member";
+    const displayDepartment = user.department || "N/A";
 
     return (
         <MainLayout title="User Details">
@@ -140,20 +203,15 @@ export function UserDetailsPage() {
                             <Avatar className="h-32 w-32 border-4 border-background shadow-lg">
                                 <AvatarImage src={user.avatarUrl} />
                                 <AvatarFallback className="text-4xl bg-muted">
-                                    {getInitials(user.name)}
+                                    {getInitials(user.username || "User")}
                                 </AvatarFallback>
                             </Avatar>
                             <div className="text-center space-y-1">
-                                <h2 className="text-2xl font-bold">{user.name}</h2>
+                                <h2 className="text-2xl font-bold">{user.username}</h2>
                                 <div className="flex flex-wrap justify-center gap-2 mt-2">
-                                    <Badge className={roleColors[user.role]}>
-                                        {roleLabels[user.role] || user.role}
+                                    <Badge className={roleColors[displayRole] || "bg-slate-500"}>
+                                        {(roleLabels[displayRole] || displayRole)}
                                     </Badge>
-                                    {user.subRoles?.map(roleId => (
-                                        <Badge key={roleId} variant="outline" className="border-primary/20 bg-primary/5">
-                                            {roleLabels[roleId] || roleId}
-                                        </Badge>
-                                    ))}
                                 </div>
                             </div>
 
@@ -162,7 +220,7 @@ export function UserDetailsPage() {
                             <div className="w-full space-y-3">
                                 <div className="flex items-center gap-3 text-sm">
                                     <Mail className="h-4 w-4 text-muted-foreground" />
-                                    <span className="truncate">{user.email}</span>
+                                    <span className="truncate">{user.primaryEmail}</span>
                                 </div>
                                 {user.phone && (
                                     <div className="flex items-center gap-3 text-sm">
@@ -172,12 +230,16 @@ export function UserDetailsPage() {
                                 )}
                                 <div className="flex items-center gap-3 text-sm">
                                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                                    <span>{user.department}</span>
+                                    <span>{displayDepartment}</span>
                                 </div>
                                 <div className="flex items-center gap-3 text-sm">
                                     <Badge variant={user.status === "active" ? "secondary" : "outline"} className="ml-auto w-full justify-center">
-                                        {user.status === "active" ? "Active Account" : "Inactive Account"}
+                                        {user.status === "active" ? "Active Account" : "Unknown Status"}
                                     </Badge>
+                                </div>
+                                <div className="flex items-center gap-3 text-sm">
+                                    <Calendar className="h-4 w-4 text-muted-foreground" />
+                                    <span>Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}</span>
                                 </div>
                             </div>
                         </CardContent>
@@ -190,16 +252,20 @@ export function UserDetailsPage() {
                                 <CardTitle>Personal Information</CardTitle>
                             </CardHeader>
                             <CardContent className="grid gap-6">
-                                {user.User_Id && (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <p className="text-sm font-medium text-muted-foreground">User ID</p>
+                                        <p className="text-base font-mono">{user.id}</p>
+                                    </div>
+                                    {user.User_Id && (
                                         <div>
-                                            <p className="text-sm font-medium text-muted-foreground">User ID</p>
+                                            <p className="text-sm font-medium text-muted-foreground">Internal ID</p>
                                             <p className="text-base">{user.User_Id}</p>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
 
-                                {user.role === "student" && (
+                                {displayRole === "student" && (
                                     <>
                                         <Separator />
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
@@ -209,69 +275,14 @@ export function UserDetailsPage() {
                                                     <p className="text-base">{user.universityId}</p>
                                                 </div>
                                             )}
-                                            {user.dateOfBirth && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-muted-foreground">Date of Birth</p>
-                                                    <p className="text-base">{new Date(user.dateOfBirth).toLocaleDateString()}</p>
-                                                </div>
-                                            )}
-                                            {user.gender && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-muted-foreground">Gender</p>
-                                                    <p className="text-base capitalize">{user.gender}</p>
-                                                </div>
-                                            )}
-                                            {user.currentClass && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-muted-foreground">Class</p>
-                                                    <p className="text-base">{user.currentClass}</p>
-                                                </div>
-                                            )}
-                                            {user.semester && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-muted-foreground">Semester</p>
-                                                    <p className="text-base">Semester {user.semester}</p>
-                                                </div>
-                                            )}
-                                            {user.enrollmentDate && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-muted-foreground">Enrollment Date</p>
-                                                    <p className="text-base">{new Date(user.enrollmentDate).toLocaleDateString()}</p>
-                                                </div>
-                                            )}
+                                            {/* Render other student fields only if they exist */}
                                         </div>
-
-                                        {(user.guardianName || user.guardianContact) && (
-                                            <>
-                                                <Separator />
-                                                <h3 className="font-semibold">Guardian Information</h3>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                                    {user.guardianName && (
-                                                        <div>
-                                                            <p className="text-sm font-medium text-muted-foreground">Guardian Name</p>
-                                                            <p className="text-base">{user.guardianName}</p>
-                                                        </div>
-                                                    )}
-                                                    {user.guardianContact && (
-                                                        <div>
-                                                            <p className="text-sm font-medium text-muted-foreground">Guardian Contact</p>
-                                                            <p className="text-base">{user.guardianContact}</p>
-                                                        </div>
-                                                    )}
-                                                    {user.guardianRelationship && (
-                                                        <div>
-                                                            <p className="text-sm font-medium text-muted-foreground">Relationship</p>
-                                                            <p className="text-base">{user.guardianRelationship}</p>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </>
-                                        )}
                                     </>
                                 )}
                             </CardContent>
                         </Card>
 
+                        {/* Documents Section - Kept as placeholder but connected to nothing real yet */}
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>Documents</CardTitle>
@@ -282,7 +293,7 @@ export function UserDetailsPage() {
                                         className="hidden"
                                         onChange={handleDocumentUpload}
                                     />
-                                    <Button variant="outline" size="sm" onClick={triggerDocumentInput} className="gap-2">
+                                    <Button variant="outline" size="sm" onClick={triggerDocumentInput} className="gap-2" disabled={true}>
                                         <Upload className="h-3 w-3" /> Upload
                                     </Button>
                                 </div>
@@ -302,23 +313,15 @@ export function UserDetailsPage() {
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-1">
-                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground">
+                                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground" disabled>
                                                         <Download className="h-4 w-4" />
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                        onClick={() => deleteDocument(doc.id)}
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
                                                     </Button>
                                                 </div>
                                             </div>
                                         ))
                                     ) : (
                                         <div className="text-center py-8 text-muted-foreground text-sm border border-dashed rounded-md bg-muted/10">
-                                            No documents uploaded yet
+                                            No documents available
                                         </div>
                                     )}
                                 </div>
