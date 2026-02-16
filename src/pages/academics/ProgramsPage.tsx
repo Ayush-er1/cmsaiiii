@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search, Edit, Trash2, BookOpen, ChevronRight, Filter, X } from "lucide-react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { Card, CardContent } from "@/components/ui/card";
@@ -31,101 +31,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
+import { Program } from "@/types/programs";
+import api from "@/lib/api";
 
-// todo: remove mock functionality
-interface Program {
-  id: string;
-  name: string;
-  level: string;
-  duration: string;
-  disciplines: string[];
-  description: string;
-  status: "active" | "inactive";
-  department: string;
-}
-
-const mockPrograms: Program[] = [
-  {
-    id: "1",
-    name: "Bachelor of Computer Science",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Software Engineering", "Data Science", "Cybersecurity"],
-    description: "Comprehensive program covering fundamental and advanced computer science concepts, preparing students for careers in software development and technology.",
-    status: "active",
-    department: "Computer Science",
-  },
-  {
-    id: "2",
-    name: "Master of Business Administration",
-    level: "Graduate",
-    duration: "2 years",
-    disciplines: ["Finance", "Marketing", "Operations"],
-    description: "Professional program preparing leaders for business challenges in the modern corporate environment.",
-    status: "active",
-    department: "Business Administration",
-  },
-  {
-    id: "3",
-    name: "Bachelor of Mechanical Engineering",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Thermodynamics", "Mechanics", "Manufacturing"],
-    description: "Engineering program focused on mechanical systems design, analysis, and manufacturing technologies.",
-    status: "active",
-    department: "Mechanical Engineering",
-  },
-  {
-    id: "4",
-    name: "Bachelor of Civil Engineering",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Structural Engineering", "Transportation", "Construction Management"],
-    description: "Comprehensive civil engineering program covering infrastructure design and project management.",
-    status: "active",
-    department: "Mechanical Engineering",
-  },
-  {
-    id: "5",
-    name: "Bachelor of Information Technology",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Network Administration", "Cloud Computing", "IT Security"],
-    description: "Technology-focused program emphasizing practical IT skills and system administration.",
-    status: "active",
-    department: "Computer Science",
-  },
-  {
-    id: "6",
-    name: "Master of Computer Applications",
-    level: "Graduate",
-    duration: "2 years",
-    disciplines: ["Mobile Development", "Web Technologies", "Database Systems"],
-    description: "Advanced program for developing expertise in software application development.",
-    status: "active",
-    department: "Computer Science",
-  },
-  {
-    id: "7",
-    name: "Bachelor of Electronics Engineering",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Circuit Design", "Embedded Systems", "Signal Processing"],
-    description: "Electronics and communications engineering with focus on modern electronic systems.",
-    status: "active",
-    department: "Mechanical Engineering",
-  },
-  {
-    id: "8",
-    name: "Doctor of Philosophy in Physics",
-    level: "Doctoral",
-    duration: "5 years",
-    disciplines: ["Quantum Mechanics", "Astrophysics", "Particle Physics"],
-    description: "Research-intensive program for advanced physics studies and original research.",
-    status: "inactive",
-    department: "Physics",
-  },
-];
 
 
 const levelColors = {
@@ -142,7 +50,9 @@ const availableDepartments = [
 ];
 
 export function ProgramsPage() {
-  const [programs, setPrograms] = useState(mockPrograms);
+  const [programs, setPrograms] = useState<Program[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -171,6 +81,30 @@ export function ProgramsPage() {
   // Sheet state
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedProgramForSheet, setSelectedProgramForSheet] = useState<Program | null>(null);
+
+  // Fetch programs from API
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await api.get<Program[]>("/programs");
+        setPrograms(response.data);
+      } catch (err) {
+        console.error("Error fetching programs:", err);
+        setError("Failed to fetch programs. Please try again.");
+        toast({
+          title: "Error",
+          description: "Failed to fetch programs from the server.",
+          variant: "destructive",
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrograms();
+  }, [toast]);
 
   const degreeOptions: Record<string, string[]> = {
     Undergraduate: ["Bachelor Degree", "Associate Degree"],
@@ -217,43 +151,52 @@ export function ProgramsPage() {
     setIsDialogOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!formData.department) {
       toast({ title: "Please select a department", variant: "destructive" });
       return;
     }
 
-    if (isEditing && selectedProgram) {
-      setPrograms((prev) =>
-        prev.map((p) =>
-          p.id === selectedProgram.id
-            ? {
-              ...p,
-              ...formData,
-              disciplines: p.disciplines, // Preserve existing disciplines
-              department: formData.department,
-            }
-            : p
-        )
-      );
-      toast({ title: "Program updated successfully" });
-    } else {
-      const newProgram: Program = {
-        id: Date.now().toString(),
-        ...formData,
-        disciplines: [],
-        status: "active",
-        department: formData.department,
-      };
-      setPrograms((prev) => [...prev, newProgram]);
-      toast({ title: "Program created successfully" });
+    try {
+      if (isEditing && selectedProgram) {
+        // Update existing program
+        const response = await api.put<Program>(`/programs/${selectedProgram.id}`, formData);
+        setPrograms((prev) =>
+          prev.map((p) =>
+            p.id === selectedProgram.id ? response.data : p
+          )
+        );
+        toast({ title: "Program updated successfully" });
+      } else {
+        // Create new program
+        const response = await api.post<Program>("/programs", formData);
+        setPrograms((prev) => [...prev, response.data]);
+        toast({ title: "Program created successfully" });
+      }
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error("Error saving program:", err);
+      toast({
+        title: "Error",
+        description: `Failed to ${isEditing ? "update" : "create"} program.`,
+        variant: "destructive",
+      });
     }
-    setIsDialogOpen(false);
   };
 
-  const handleDelete = (id: string) => {
-    setPrograms((prev) => prev.filter((p) => p.id !== id));
-    toast({ title: "Program deleted", variant: "destructive" });
+  const handleDelete = async (id: string) => {
+    try {
+      await api.delete(`/programs/${id}`);
+      setPrograms((prev) => prev.filter((p) => p.id !== id));
+      toast({ title: "Program deleted successfully", variant: "destructive" });
+    } catch (err) {
+      console.error("Error deleting program:", err);
+      toast({
+        title: "Error",
+        description: "Failed to delete program.",
+        variant: "destructive",
+      });
+    }
   };
 
   const openProgramDetails = (program: Program) => {
@@ -477,13 +420,28 @@ export function ProgramsPage() {
             ))}
         </div>
 
-        {filteredPrograms.length === 0 && (
+        {loading ? (
+          <Card>
+            <CardContent className="p-8 text-center text-muted-foreground">
+              <div className="flex items-center justify-center gap-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span>Loading programs...</span>
+              </div>
+            </CardContent>
+          </Card>
+        ) : error ? (
+          <Card>
+            <CardContent className="p-8 text-center text-destructive">
+              {error}
+            </CardContent>
+          </Card>
+        ) : filteredPrograms.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
               No programs found. Try adjusting your search or create a new program.
             </CardContent>
           </Card>
-        )}
+        ) : null}
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

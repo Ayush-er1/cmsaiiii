@@ -16,8 +16,6 @@ import { UsersPage } from "@/pages/administration/UsersPage";
 import { EnrollUserPage } from "@/pages/administration/EnrollUserPage";
 import { UserDetailsPage } from "@/pages/administration/UserDetailsPage";
 import { AttendancePage } from "@/pages/student-services/AttendancePage";
-import { ResultsPage } from "@/pages/student-services/ResultsPage";
-import { StudentReportsPage } from "@/pages/student-services/StudentReportsPage";
 
 import { ClassRoutinePage } from "@/pages/academics/ClassRoutinePage";
 import { ProfilePage } from "@/pages/user/ProfilePage";
@@ -103,12 +101,7 @@ function Router() {
       <Route path="/roles-permissions">
         <ProtectedRoute component={RolesPermissionsPage} permission="permissions_manage" />
       </Route>
-      <Route path="/results">
-        <ProtectedRoute component={ResultsPage} permission="results_view" />
-      </Route>
-      <Route path="/my-reports">
-        <ProtectedRoute component={StudentReportsPage} permission="results_view" />
-      </Route>
+
 
       <Route path="/fees">
         <ProtectedRoute component={FeesPage} permission="fees_view" />

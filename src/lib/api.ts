@@ -2,10 +2,11 @@ import axios from 'axios';
 
 // Create an Axios instance with default configuration
 const api = axios.create({
-    baseURL: 'http://localhost:8001/api/v1',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
+    timeout: Number(import.meta.env.VITE_API_TIMEOUT) || 10000,
 });
 
 // Request interceptor to add the access token to every request

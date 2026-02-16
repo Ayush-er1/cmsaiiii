@@ -15,7 +15,6 @@ import {
   UserCheck,
   Award,
   Clock,
-  BarChart3,
 } from "lucide-react";
 import {
   Sidebar,
@@ -99,12 +98,6 @@ const navItems: NavItem[] = [
     url: "/class-routine",
     icon: Clock,
     permissionId: "routine_view",
-  },
-  {
-    title: "Reports",
-    url: "/my-reports",
-    icon: BarChart3,
-    permissionId: "results_view", // Students view reports via results_view usually
   },
   {
     title: "Fees",
