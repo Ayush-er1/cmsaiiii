@@ -77,50 +77,31 @@ const GROUP_CATEGORIES = [
     }
 ];
 
+// Define Group type based on initialGroups structure
+interface Group {
+    id: string;
+    name: string;
+    description: string;
+    memberIds: string[];
+    memberPositions: Record<string, string>;
+    status: string;
+    type: string;
+    color: string;
+}
+
 // Mock Data for Groups
-export const initialGroups = [
-    {
-        id: "GR-001",
-        name: "Student Council",
-        description: "Elected body of students responsible for representing student interests.",
-        memberIds: ["u1", "u2", "u3"],
-        memberPositions: { "u1": "President", "u2": "Vice President", "u3": "Secretary" } as Record<string, string>,
-        status: "Active",
-        type: "Academic",
-        color: "bg-blue-500"
-    },
-    {
-        id: "GR-002",
-        name: "Sports Committee",
-        description: "Dedicated to organizing inter-college tournaments and athletic events.",
-        memberIds: ["u4", "u5"],
-        memberPositions: { "u4": "Sports Captain" } as Record<string, string>,
-        status: "Active",
-        type: "Social",
-        color: "bg-orange-500"
-    },
-    {
-        id: "GR-003",
-        name: "Tech Society",
-        description: "Group focus on coding workshops, hackathons, and technology trends.",
-        memberIds: ["u1", "u6", "u7"],
-        memberPositions: { "u1": "Tech Lead", "u6": "Faculty Advisor" } as Record<string, string>,
-        status: "Active",
-        type: "Club",
-        color: "bg-emerald-500"
-    }
-];
+export const initialGroups: Group[] = [];
+
+// Define User type based on mockUsersForGroups structure
+interface User {
+    id: string;
+    name: string;
+    role: string;
+    dept: string;
+}
 
 // Mock Users for adding to groups
-const mockUsersForGroups = [
-    { id: "u1", name: "Emily Parker", role: "Student", dept: "Computer Science" },
-    { id: "u2", name: "James Wilson", role: "Student", dept: "Business Administration" },
-    { id: "u3", name: "Sarah Brown", role: "Student", dept: "Computer Science" },
-    { id: "u4", name: "Michael Davis", role: "Student", dept: "Computer Science" },
-    { id: "u5", name: "Robert Lee", role: "Student", dept: "Mechanical Engineering" },
-    { id: "u6", name: "Dr. Lisa Wang", role: "Faculty", dept: "Computer Science" },
-    { id: "u7", name: "Prof. Michael Chen", role: "Faculty", dept: "Computer Science" },
-];
+const mockUsersForGroups: User[] = [];
 
 export function GroupsPage() {
     const { toast } = useToast();

@@ -44,88 +44,7 @@ interface Program {
   department: string;
 }
 
-const mockPrograms: Program[] = [
-  {
-    id: "1",
-    name: "Bachelor of Computer Science",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Software Engineering", "Data Science", "Cybersecurity"],
-    description: "Comprehensive program covering fundamental and advanced computer science concepts, preparing students for careers in software development and technology.",
-    status: "active",
-    department: "Computer Science",
-  },
-  {
-    id: "2",
-    name: "Master of Business Administration",
-    level: "Graduate",
-    duration: "2 years",
-    disciplines: ["Finance", "Marketing", "Operations"],
-    description: "Professional program preparing leaders for business challenges in the modern corporate environment.",
-    status: "active",
-    department: "Business Administration",
-  },
-  {
-    id: "3",
-    name: "Bachelor of Mechanical Engineering",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Thermodynamics", "Mechanics", "Manufacturing"],
-    description: "Engineering program focused on mechanical systems design, analysis, and manufacturing technologies.",
-    status: "active",
-    department: "Mechanical Engineering",
-  },
-  {
-    id: "4",
-    name: "Bachelor of Civil Engineering",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Structural Engineering", "Transportation", "Construction Management"],
-    description: "Comprehensive civil engineering program covering infrastructure design and project management.",
-    status: "active",
-    department: "Mechanical Engineering",
-  },
-  {
-    id: "5",
-    name: "Bachelor of Information Technology",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Network Administration", "Cloud Computing", "IT Security"],
-    description: "Technology-focused program emphasizing practical IT skills and system administration.",
-    status: "active",
-    department: "Computer Science",
-  },
-  {
-    id: "6",
-    name: "Master of Computer Applications",
-    level: "Graduate",
-    duration: "2 years",
-    disciplines: ["Mobile Development", "Web Technologies", "Database Systems"],
-    description: "Advanced program for developing expertise in software application development.",
-    status: "active",
-    department: "Computer Science",
-  },
-  {
-    id: "7",
-    name: "Bachelor of Electronics Engineering",
-    level: "Undergraduate",
-    duration: "4 years",
-    disciplines: ["Circuit Design", "Embedded Systems", "Signal Processing"],
-    description: "Electronics and communications engineering with focus on modern electronic systems.",
-    status: "active",
-    department: "Mechanical Engineering",
-  },
-  {
-    id: "8",
-    name: "Doctor of Philosophy in Physics",
-    level: "Doctoral",
-    duration: "5 years",
-    disciplines: ["Quantum Mechanics", "Astrophysics", "Particle Physics"],
-    description: "Research-intensive program for advanced physics studies and original research.",
-    status: "inactive",
-    department: "Physics",
-  },
-];
+const mockPrograms: Program[] = [];
 
 
 const levelColors = {
@@ -168,7 +87,6 @@ export function ProgramsPage() {
     department: "",
   });
 
-  // Sheet state
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [selectedProgramForSheet, setSelectedProgramForSheet] = useState<Program | null>(null);
 
@@ -206,7 +124,7 @@ export function ProgramsPage() {
   const openEditDialog = (program: Program) => {
     setFormData({
       level: program.level,
-      degreeType: "", // Will need to extract from name or store separately
+      degreeType: "",
       name: program.name,
       duration: program.duration,
       description: program.description,
@@ -230,7 +148,7 @@ export function ProgramsPage() {
             ? {
               ...p,
               ...formData,
-              disciplines: p.disciplines, // Preserve existing disciplines
+              disciplines: p.disciplines,
               department: formData.department,
             }
             : p

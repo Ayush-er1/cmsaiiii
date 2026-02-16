@@ -1,8 +1,10 @@
 import axios from 'axios';
+import { env } from './env';
 
 // Create an Axios instance with default configuration
 const api = axios.create({
-    baseURL: 'http://localhost:8001/api/v1',
+    baseURL: env.apiBaseUrl,
+    timeout: env.apiTimeout,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -22,7 +24,7 @@ api.interceptors.request.use(
     }
 );
 
-// Response interceptor to handle common errors (optional but good practice)
+// Response interceptor to handle common errors
 api.interceptors.response.use(
     (response) => {
         return response;
@@ -31,8 +33,8 @@ api.interceptors.response.use(
         // You can handle 401 Unauthorized here, e.g., redirect to login or refresh token
         if (error.response && error.response.status === 401) {
             // Potentially clear token or redirect
-            // localStorage.removeItem('access_token');
-            // window.location.href = '/login';
+            localStorage.removeItem('access_token');
+            window.location.href = '/login';
         }
         return Promise.reject(error);
     }

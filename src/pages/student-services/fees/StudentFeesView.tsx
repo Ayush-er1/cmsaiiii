@@ -42,32 +42,17 @@ import { FeeLedgerTable } from "./FeeLedgerTable";
 
 // Mock data for student fees
 const feeStats = {
-    totalDue: 909000,
-    totalPaid: 665833,
-    netBalance: 243167,
-    nextDueDate: "2024-01-15",
+    totalDue: 0,
+    totalPaid: 0,
+    netBalance: 0,
+    nextDueDate: "-",
 };
 
-const scholarships = [
-    { id: "CN-190", date: "January 12, 2025", fiscalYear: "2081-2082", title: "Merit Scholarship", amount: 186334, status: "settled" },
-    { id: "CN-315", date: "February 27, 2025", fiscalYear: "2081-2082", title: "Early Bird Discount", amount: 322666, status: "settled" },
-];
+const scholarships: any[] = [];
 
-const receipts = [
-    { id: "554", date: "October 28, 2025", fiscalYear: "2082-2083", amount: 8333, tax: 0, status: "Success" },
-    { id: "1287", date: "April 16, 2025", fiscalYear: "2081-2082", amount: 9833, tax: 0, status: "Success" },
-    { id: "899", date: "January 6, 2025", fiscalYear: "2081-2082", amount: 225000, tax: 0, status: "Success" },
-    { id: "469", date: "December 20, 2024", fiscalYear: "2081-2082", amount: 75000, tax: 0, status: "Success" },
-];
+const receipts: any[] = [];
 
-const transactions = [
-    { date: "Sept 4, 2026", particular: "College Fee Installment 2", description: "Level 5 Sem II", debit: 89000, credit: 80667, balance: 8333, status: "Unpaid", remarks: "CN-315" },
-    { date: "Feb 13, 2026", particular: "College Fee Installment 1", description: "Level 5 Sem I", debit: 89000, credit: 80666, balance: 8334, status: "Unpaid", remarks: "CN-315" },
-    { date: "Dec 5, 2025", particular: "University & Exam Fees", description: "Level 5", debit: 225000, credit: 0, balance: 225000, status: "Unpaid", remarks: "-" },
-    { date: "Aug 15, 2025", particular: "College Fee Installment 2", description: "Level 4 Sem II", debit: 89000, credit: 89000, balance: 0, status: "Paid", remarks: "REC-554" },
-    { date: "Mar 14, 2025", particular: "College Fee Installment 1", description: "Level 4 Sem I", debit: 89000, credit: 89000, balance: 0, status: "Paid", remarks: "REC-1287" },
-    { date: "Dec 13, 2024", particular: "Admission Fee", description: "Admission", debit: 100000, credit: 100000, balance: 0, status: "Paid", remarks: "REC-469" },
-];
+const transactions: any[] = [];
 
 export function StudentFeesView() {
     const { toast } = useToast();

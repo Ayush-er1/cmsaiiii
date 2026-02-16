@@ -24,7 +24,6 @@ export function useTokenExchange() {
 
         const claims: IDToken = (tokens.claims as any)?.();
         const userinfo = claims;
-        // const userinfo = await userInfo(tokens.access_token, claims?.sub);
 
         return { tokens, userinfo };
     };

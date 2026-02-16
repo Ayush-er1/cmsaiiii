@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/lib/auth-context";
 import { useToast } from "@/hooks/use-toast";
 import { Card } from "@/components/ui/card";
 import { useAuthCodeFlow } from "@/hooks/auth-hooks";
 
 export function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  // const { login } = useAuth(); // Replaced by OIDC flow
   const { toast } = useToast();
   const onLogin = useAuthCodeFlow();
 
@@ -18,7 +16,6 @@ export function LoginPage() {
     setIsLoading(true);
     try {
       await onLogin();
-      // Redirect happens here, so no need for toast usually, but in case:
     } catch (error) {
       console.error("Login failed", error);
       toast({
@@ -30,13 +27,9 @@ export function LoginPage() {
     }
   };
 
-  // Quick login for demo purposes (kept as requested to preserve files/logic, but modified to warn or maybe should just use the new flow?)
-  // For now, I'll leave the quick buttons but map them to the same flow or just disable them/keep them as mock fallbacks if the user wants. 
-  // But the request was to port logic. I'll make the main "Sign In" button use the new flow.
 
   const quickLogin = async (role: string) => {
-    // Mock quick login behavior for demo purposes OR mapped to specific OIDC hints if supported.
-    // For now, let's just trigger the main flow as that's the "real" logic now.
+
     handleSubmit({ preventDefault: () => { } } as React.FormEvent);
   };
 

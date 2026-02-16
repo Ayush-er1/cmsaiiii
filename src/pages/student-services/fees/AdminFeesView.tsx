@@ -48,39 +48,20 @@ import { cn } from "@/lib/utils";
 
 // Mock data for Admin Fees Panel
 const adminFeeStats = {
-    totalCollection: 4589000,
-    outstandingBalance: 1245000,
-    totalScholarships: 580000,
-    studentsWithDue: 85,
-    todayCollection: 125000,
+    totalCollection: 0,
+    outstandingBalance: 0,
+    totalScholarships: 0,
+    studentsWithDue: 0,
+    todayCollection: 0,
 };
 
-const recentPayments = [
-    { id: "REC-2001", student: "Aayush Sharma", roll: "2081-001", date: "Today, 10:24 AM", amount: 45000, method: "Khalti", status: "Success" },
-    { id: "REC-2002", student: "Bipul Subedi", roll: "2081-042", date: "Today, 09:15 AM", amount: 15000, method: "eSewa", status: "Success" },
-    { id: "REC-2003", student: "Sita Kumari", roll: "2081-112", date: "Yesterday", amount: 89000, method: "Bank Transfer", status: "Success" },
-    { id: "REC-2004", student: "Rahul Mahat", roll: "2081-088", date: "Yesterday", amount: 10000, method: "Cash", status: "Success" },
-    { id: "REC-2005", student: "Anjali Joshi", roll: "2081-015", date: "Oct 22, 2025", amount: 25000, method: "Bank Transfer", status: "Success" },
-];
+const recentPayments: any[] = [];
 
-const pendingFees = [
-    { student: "Kiran Kc", roll: "2081-022", program: "BSc. CSIT", semester: "3rd Sem", dueAmount: 65000, lastNotice: "Oct 15, 2025" },
-    { student: "Sunita Tamang", roll: "2081-045", program: "BBM", semester: "1st Sem", dueAmount: 12000, lastNotice: "Oct 18, 2025" },
-    { student: "Dipesh Rana", roll: "2081-009", program: "BCA", semester: "5th Sem", dueAmount: 45000, lastNotice: "Not Sent" },
-    { student: "Maya Magar", roll: "2081-031", program: "BSc. CSIT", semester: "3rd Sem", dueAmount: 98000, lastNotice: "Oct 20, 2025" },
-];
+const pendingFees: any[] = [];
 
-const scholarshipsAdmin = [
-    { student: "Arjun Thapa", roll: "2081-067", program: "BCA", type: "Merit Based", amount: 50000, status: "Active" },
-    { student: "Pooja Gurung", roll: "2081-092", program: "BBM", type: "Need Based", amount: 35000, status: "Active" },
-    { student: "Suman Giri", roll: "2081-104", program: "BSc. CSIT", type: "Sports Quota", amount: 25000, status: "Pending" },
-];
+const scholarshipsAdmin: any[] = [];
 
-const ledgerMockData = [
-    { date: "Sept 4, 2026", particular: "College Fee Installment 2", description: "Level 5 Sem II", debit: 89000, credit: 80667, balance: 8333, status: "Unpaid", remarks: "CN-315" },
-    { date: "Feb 13, 2026", particular: "College Fee Installment 1", description: "Level 5 Sem I", debit: 89000, credit: 80666, balance: 8334, status: "Unpaid", remarks: "CN-315" },
-    { date: "Dec 5, 2025", particular: "University & Exam Fees", description: "Level 5", debit: 225000, credit: 0, balance: 225000, status: "Unpaid", remarks: "-" },
-];
+const ledgerMockData: any[] = [];
 
 export function AdminFeesView() {
     const { toast } = useToast();

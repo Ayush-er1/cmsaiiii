@@ -12,10 +12,8 @@ export interface AuthUser {
   subRoles?: string[];
   department?: string;
   avatarUrl?: string;
-  // Staff-specific fields
-  assignedCourses?: string[]; // Course codes that staff teaches
+  assignedCourses?: string[];
   User_Id?: string;
-  // Student-specific fields
   phone?: string;
   universityId?: string;
   dateOfBirth?: string;
@@ -28,7 +26,7 @@ export interface AuthUser {
   enrollmentDate?: string;
   program?: string;
   group?: string;
-  enrolledCourses?: string[]; // Course codes student is enrolled in
+  enrolledCourses?: string[];
 }
 
 interface AuthContextType {
@@ -43,56 +41,6 @@ interface AuthContextType {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// todo: remove mock functionality
-const mockUsers: Record<string, AuthUser> = {
-  "admin@college.edu": {
-    id: "1",
-    name: "Dr. Sarah Johnson",
-    email: "admin@college.edu",
-    role: "super_admin",
-    User_Id: "SA2024001",
-    department: "Administration",
-  },
-  "deptadmin@college.edu": {
-    id: "4",
-    name: "Prof. Alan Turing",
-    email: "deptadmin@college.edu",
-    role: "admin",
-    User_Id: "ADM2024002",
-    department: "Computer Science",
-  },
-  "staff@college.edu": {
-    id: "2",
-    name: "Prof. Michael Chen",
-    email: "staff@college.edu",
-    role: "staff",
-    User_Id: "STF2024001",
-    department: "Computer Science",
-    assignedCourses: ["CS101", "CS201", "CS301", "CS401", "CS501"], // Courses this staff teaches
-  },
-  "student@college.edu": {
-    id: "3",
-    name: "Emily Parker",
-    email: "student@college.edu",
-    role: "student",
-    department: "Computer Science",
-    phone: "+1 555-0103",
-    User_Id: "COL2024001",
-    universityId: "UNI2024001",
-    dateOfBirth: "2002-05-15",
-    gender: "female",
-    currentClass: "BCS Year 3",
-    semester: "5",
-    guardianName: "Robert Parker",
-    guardianContact: "+1 555-0150",
-    guardianRelationship: "Father",
-    enrollmentDate: "2024-09-01",
-    program: "Bachelor of Computer Science",
-    group: "Section A",
-    enrolledCourses: ["CS101", "CS201", "CS301"], // Courses student is enrolled in
-  },
-};
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
@@ -120,6 +68,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.setItem("rolePermissions", JSON.stringify(newPermissions));
   };
 
+  /**
+   * Validates if the current user has a specific permission.
+   * Super admins bypass all permission checks.
+   */
   const hasPermission = (permissionId: string) => {
     if (!user) return false;
     if (user.role === "super_admin") return true;
@@ -128,7 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const rolePerms = permissions[user.role] || [];
     if (rolePerms.includes(permissionId)) return true;
 
-    // Check sub-role permissions
+    // Check sub-role permissions for additional access
     if (user.subRoles && user.subRoles.length > 0) {
       for (const subRole of user.subRoles) {
         const subRolePerms = permissions[subRole] || [];
@@ -139,23 +91,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const login = async (email: string, _password: string) => {
-    // todo: remove mock functionality - replace with real API call
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    const mockUser = mockUsers[email];
-    if (mockUser) {
-      setUser(mockUser);
-      localStorage.setItem("authUser", JSON.stringify(mockUser));
-    } else {
-      throw new Error("Invalid credentials");
-    }
+  /**
+   * Placeholder for local login. All production logins must go through OIDC.
+   */
+  const login = async (_email: string, _password: string) => {
+    throw new Error("Local login not implemented. Please use OAuth login.");
   };
 
+  /**
+   * Updates the authenticated user state and persists it to localStorage.
+   */
   const setAuthUser = (user: AuthUser) => {
     setUser(user);
     localStorage.setItem("authUser", JSON.stringify(user));
   };
 
+  /**
+   * Logs out the user locally and redirects to the OIDC provider's end session endpoint.
+   */
   const logout = async () => {
     const idToken = localStorage.getItem("id_token");
 
@@ -165,14 +118,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("id_token");
     localStorage.removeItem("rolePermissions");
 
-    // Update state
+    // Clear application state
     setUser(null);
 
-    // Redirect to OIDC provider to end session
+    // Redirect to OIDC provider to end global session
     try {
       await signOutRedirect(idToken || undefined);
     } catch (error) {
-      console.error("Failed to sign out redirect:", error);
+      console.error("Failed to initiate sign-out redirect:", error);
     }
   };
 

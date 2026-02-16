@@ -2,3 +2,7 @@ node_modules/
 *.log
 *.tsbuildinfo
 dist/
+
+# Environment variables
+.env
+.env.local
