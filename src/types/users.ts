@@ -22,6 +22,33 @@ export interface UserDetail {
     documents?: any[];
 }
 
+export interface StudentFormData {
+    universityId: string;
+    dateOfBirth: string;
+    gender: string;
+    currentClass: string;
+    semester: string;
+    guardianName: string;
+    guardianContact: string;
+    guardianRelationship: string;
+}
+
+export interface AccountFormData {
+    firstName: string;
+    lastName: string;
+    userId: string;
+    email: string;
+    password: string;
+}
+
+export interface ProfileFormData {
+    role: string;
+    subRoles: string[];
+    department: string;
+    phone: string;
+    status: "active" | "inactive";
+}
+
 export const roleLabels: Record<string, string> = {
     super_admin: "Super Admin",
     admin: "Admin",
