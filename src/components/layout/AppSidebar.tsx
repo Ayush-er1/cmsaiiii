@@ -13,7 +13,6 @@ import {
   Shield,
   Lock,
   UserCheck,
-  Award,
   Clock,
 } from "lucide-react";
 import {
@@ -87,12 +86,8 @@ const navItems: NavItem[] = [
     icon: UserCheck,
     permissionId: "attendance_view",
   },
-  {
-    title: "Results",
-    url: "/results",
-    icon: Award,
-    permissionId: "results_view",
-  },
+
+
   {
     title: "Class Routine",
     url: "/class-routine",

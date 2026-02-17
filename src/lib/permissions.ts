@@ -77,16 +77,8 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
             { id: "attendance_report", name: "Download Reports", description: "Download attendance summaries", action: "export" },
         ],
     },
-    {
-        id: "results",
-        name: "Results",
-        icon: "FileBarChart",
-        permissions: [
-            { id: "results_view", name: "View Results", description: "View exam results", action: "view" },
-            { id: "results_publish", name: "Publish Results", description: "Publish and notify results", action: "manage" },
-            { id: "results_edit", name: "Modify Grades", description: "Edit student marks/grades", action: "edit" },
-        ],
-    },
+
+
     {
         id: "profile",
         name: "Profile",
@@ -139,7 +131,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
         "courses_view", "courses_create", "courses_edit",
         "users_view", "users_create", "users_edit",
         "attendance_view", "attendance_mark", "attendance_report",
-        "results_view", "results_publish",
+
+
         "fees_view", "fees_manage",
         "calendar_view", "routine_view", "routine_manage",
         "profile_view", "profile_edit", "password_change"
@@ -149,7 +142,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
         "courses_view", "syllabus_upload",
         "users_view",
         "attendance_view", "attendance_mark",
-        "results_view", "results_edit",
+
+
         "calendar_view", "routine_view",
         "profile_view", "password_change"
     ],
@@ -157,7 +151,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
         "dashboard_view",
         "courses_view",
         "attendance_view",
-        "results_view",
+
+
         "fees_view",
         "calendar_view", "routine_view",
         "profile_view", "password_change"
@@ -166,7 +161,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
         "dashboard_view",
         "courses_view", "syllabus_upload",
         "attendance_view", "attendance_mark",
-        "results_view", "results_edit",
+
+
         "calendar_view", "routine_view",
         "profile_view", "password_change"
     ],
@@ -174,7 +170,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
         "dashboard_view",
         "courses_view",
         "attendance_view",
-        "results_view",
+
+
         "fees_view",
         "calendar_view", "routine_view",
         "profile_view", "password_change"
@@ -183,7 +180,8 @@ export const DEFAULT_ROLE_PERMISSIONS: RolePermissions = {
         "dashboard_view",
         "courses_view",
         "attendance_view",
-        "results_view",
+
+
         "fees_view",
         "calendar_view", "routine_view",
         "profile_view", "password_change"

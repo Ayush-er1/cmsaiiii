@@ -15,13 +15,14 @@ import { CoursesPage } from "@/pages/academics/CoursesPage";
 import { UsersPage } from "@/pages/administration/UsersPage";
 import { EnrollUserPage } from "@/pages/administration/EnrollUserPage";
 import { UserDetailsPage } from "@/pages/administration/UserDetailsPage";
-import { AttendancePage } from "@/pages/student-services/AttendancePage";
+
 
 import { ClassRoutinePage } from "@/pages/academics/ClassRoutinePage";
 import { ProfilePage } from "@/pages/user/ProfilePage";
 import { ChangePasswordPage } from "@/pages/user/ChangePasswordPage";
 import { FeesPage } from "@/pages/student-services/FeesPage";
 // import { AdminFeesPage } from "@/pages/AdminFeesPage"; // Removed as it's unified
+import { AttendancePage } from "@/pages/student-services/AttendancePage";
 import { GroupsPage } from "@/pages/administration/GroupsPage";
 import { RolesPermissionsPage } from "@/pages/administration/RolesPermissionsPage";
 import { CalendarPage } from "@/pages/academics/CalendarPage";
@@ -92,6 +93,7 @@ function Router() {
       <Route path="/users/:id">
         <ProtectedRoute component={UserDetailsPage} permission="users_view" />
       </Route>
+
       <Route path="/attendance">
         <ProtectedRoute component={AttendancePage} permission="attendance_view" />
       </Route>

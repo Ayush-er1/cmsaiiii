@@ -41,12 +41,8 @@ export function DashboardQuickActions({ user }: DashboardQuickActionsProps) {
                                 View Attendance
                             </Button>
                         </Link>
-                        <Link href="/results">
-                            <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-results">
-                                <FileText className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                                View Results
-                            </Button>
-                        </Link>
+
+
                     </div>
                 </CardContent>
             </Card>
@@ -74,12 +70,8 @@ export function DashboardQuickActions({ user }: DashboardQuickActionsProps) {
                                 Mark Attendance
                             </Button>
                         </Link>
-                        <Link href="/results">
-                            <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-results">
-                                <FileText className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
-                                Enter Grades
-                            </Button>
-                        </Link>
+
+
                         <Link href="/calendar">
                             <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-calendar">
                                 <Calendar className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
@@ -106,12 +98,13 @@ export function DashboardQuickActions({ user }: DashboardQuickActionsProps) {
                             Class Routine
                         </Button>
                     </Link>
-                    <Link href="/student-attendance">
+                    <Link href="/attendance">
                         <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-attendance">
                             <ClipboardCheck className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />
                             My Attendance
                         </Button>
                     </Link>
+
                     <Link href="/my-reports">
                         <Button className="bg-[#F4F5F6] hover:bg-[#E2E4E8] text-[#1A2E56] dark:bg-secondary dark:text-white dark:hover:bg-secondary/80 w-full justify-start gap-1.5 px-2.5 h-9 text-xs sm:text-sm sm:h-10 sm:gap-2 sm:px-4" data-testid="button-quick-reports">
                             <TrendingUp className="h-3.5 w-3.5 ml-[5px] sm:ml-0 sm:h-4 sm:w-4" />

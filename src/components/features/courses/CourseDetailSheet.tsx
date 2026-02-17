@@ -60,6 +60,7 @@ export function CourseDetailSheet({ open, onOpenChange, course, stats }: CourseD
                                 <p className="text-2xl font-bold text-green-600">{stats.avgAttendance}</p>
                             </CardContent>
                         </Card>
+
                     </div>
 
                     <div className="space-y-4">

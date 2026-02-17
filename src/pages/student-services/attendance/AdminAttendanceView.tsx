@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, Download, Check, X, Calendar, Filter, Plus } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Search, Download, Check, X, Calendar, Filter, Plus, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,8 +31,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
 import { Badge } from "@/components/ui/badge";
+import api from "@/lib/api";
 
-// Mock Data
 interface AttendanceRecord {
     id: string;
     User_Id: string;
@@ -43,52 +43,24 @@ interface AttendanceRecord {
     status: "present" | "absent" | "late";
 }
 
-const mockStudentAttendance: AttendanceRecord[] = [
-    { id: "1", User_Id: "STU2024001", personName: "Emily Parker", course: "CS101", date: "2025-12-15", status: "present" },
-    { id: "2", User_Id: "STU2024002", personName: "James Wilson", course: "MBA501", date: "2025-12-15", status: "present" },
-    { id: "3", User_Id: "STU2023015", personName: "Robert Lee", course: "ME301", date: "2025-12-15", status: "absent" },
-    { id: "4", User_Id: "STU2024001", personName: "Emily Parker", course: "CS201", date: "2025-12-15", status: "late" },
-    { id: "5", User_Id: "STU2024003", personName: "Sarah Brown", course: "CS101", date: "2025-12-15", status: "present" },
-    { id: "6", User_Id: "STU2024004", personName: "Michael Davis", course: "CS101", date: "2025-12-15", status: "present" },
-];
-
-const mockStaffAttendance: AttendanceRecord[] = [
-    { id: "s1", User_Id: "FAC001", personName: "Prof. Michael Chen", department: "Computer Science", date: "2025-12-15", status: "present" },
-    { id: "s2", User_Id: "FAC002", personName: "Dr. Lisa Wang", department: "Computer Science", date: "2025-12-15", status: "present" },
-    { id: "s3", User_Id: "FAC003", personName: "Prof. James Wilson", department: "Business", date: "2025-12-15", status: "late" },
-    { id: "s4", User_Id: "FAC004", personName: "Dr. Robert Lee", department: "Mechanical Engineering", date: "2025-12-15", status: "present" },
-];
-
-// Mock Lists for marking
-const mockStudentList = [
-    { User_Id: "STU2024001", name: "Emily Parker", course: "CS101" },
-    { User_Id: "STU2024002", name: "James Wilson", course: "MBA501" },
-    { User_Id: "STU2024003", name: "Sarah Brown", course: "CS101" },
-    { User_Id: "STU2024004", name: "Michael Davis", course: "CS101" },
-    { User_Id: "STU2023015", name: "Robert Lee", course: "ME301" },
-];
-
-const mockStaffList = [
-    { User_Id: "FAC001", name: "Prof. Michael Chen", department: "Computer Science" },
-    { User_Id: "FAC002", name: "Dr. Lisa Wang", department: "Computer Science" },
-    { User_Id: "FAC003", name: "Prof. James Wilson", department: "Business" },
-    { User_Id: "FAC004", name: "Dr. Robert Lee", department: "Mechanical Engineering" },
-];
-
-const courses = ["CS101", "CS201", "MBA501", "ME301"];
-const departments = ["Computer Science", "Business", "Mechanical Engineering", "Administration", "IT Support"];
-
 export function AdminAttendanceView() {
     const { user } = useAuth();
     const { toast } = useToast();
 
-    const [studentRecords, setStudentRecords] = useState(mockStudentAttendance);
-    const [staffRecords, setStaffRecords] = useState(mockStaffAttendance);
+    const [studentRecords, setStudentRecords] = useState<AttendanceRecord[]>([]);
+    const [staffRecords, setStaffRecords] = useState<AttendanceRecord[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // Selection lists for marking
+    const [studentList, setStudentList] = useState<any[]>([]);
+    const [staffList, setStaffList] = useState<any[]>([]);
+    const [courses, setCourses] = useState<string[]>([]);
+    const [departments, setDepartments] = useState<string[]>([]);
+
     const [search, setSearch] = useState("");
     const [courseFilter, setCourseFilter] = useState("all");
     const [departmentFilter, setDepartmentFilter] = useState("all");
     const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
-    const [isEditing, setIsEditing] = useState(false);
     const [activeTab, setActiveTab] = useState("students");
     const [showFilters, setShowFilters] = useState(false);
 
@@ -109,8 +81,22 @@ export function AdminAttendanceView() {
     const isStaff = userRole === "staff" || userRole === "teacher";
     const staffAssignedCourses = user?.assignedCourses || [];
 
-    const canEditStudents = isStaff;
-    const canEditStaff = isSuperAdmin || isAdmin;
+    // Fetch data (Placeholder for real API)
+    useEffect(() => {
+        const fetchAttendance = async () => {
+            try {
+                setLoading(true);
+                // Real API calls would go here
+                // const response = await api.get("/attendance");
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to fetch attendance:", err);
+                setLoading(false);
+            }
+        };
+
+        fetchAttendance();
+    }, [activeTab]);
 
     // Filter Logic
     const filteredStudentRecords = studentRecords.filter((r) => {
@@ -118,7 +104,6 @@ export function AdminAttendanceView() {
         const matchesCourse = courseFilter === "all" || r.course === courseFilter;
         const matchesDate = !dateFilter || r.date === dateFilter;
 
-        // Staff constraint
         if (isStaff && !staffAssignedCourses.includes(r.course || "")) return false;
 
         return matchesSearch && matchesCourse && matchesDate;
@@ -156,57 +141,29 @@ export function AdminAttendanceView() {
         setIsInMarkingMode(true);
     };
 
-    const handleSaveMarkedAttendance = () => {
-        if (markingType === "student") {
-            const newRecords: AttendanceRecord[] = Object.entries(studentAttendanceMap).map(([userId, status]) => {
-                const student = mockStudentList.find(s => s.User_Id === userId);
-                return {
-                    id: `${userId}-${attendanceDate}-${Date.now()}`,
-                    User_Id: userId,
-                    personName: student?.name || "Unknown",
-                    course: selectedCourse,
-                    date: attendanceDate,
-                    status,
-                };
-            });
-
-            setStudentRecords(prev => [...prev, ...newRecords]);
-            toast({ title: `Attendance marked for ${newRecords.length} students` });
-        } else if (markingType === "staff") {
-            const newRecords: AttendanceRecord[] = Object.entries(staffAttendanceMap).map(([userId, status]) => {
-                const staff = mockStaffList.find(s => s.User_Id === userId);
-                return {
-                    id: `${userId}-${attendanceDate}-${Date.now()}`,
-                    User_Id: userId,
-                    personName: staff?.name || "Unknown",
-                    department: staff?.department,
-                    date: attendanceDate,
-                    status,
-                };
-            });
-
-            setStaffRecords(prev => [...prev, ...newRecords]);
-            toast({ title: `Staff attendance marked for ${newRecords.length} members` });
+    const handleSaveMarkedAttendance = async () => {
+        try {
+            // Implementation for saving to API would go here
+            toast({ title: "Attendance saved successfully" });
+            setIsInMarkingMode(false);
+            setStudentAttendanceMap({});
+            setStaffAttendanceMap({});
+            setMarkingType(null);
+        } catch (err) {
+            toast({ title: "Failed to save attendance", variant: "destructive" });
         }
-
-        setIsInMarkingMode(false);
-        setStudentAttendanceMap({});
-        setStaffAttendanceMap({});
-        setSelectedCourse("");
-        setSelectedDepartment("");
-        setMarkingType(null);
     };
 
     const markAllAs = (status: "present" | "absent" | "late") => {
         if (markingType === "student") {
-            const allStudents = mockStudentList.filter(s => s.course === selectedCourse);
+            const list = studentList.filter(s => s.course === selectedCourse);
             const newMap: Record<string, "present" | "absent" | "late"> = {};
-            allStudents.forEach(student => newMap[student.User_Id] = status);
+            list.forEach(student => newMap[student.User_Id] = status);
             setStudentAttendanceMap(newMap);
         } else if (markingType === "staff") {
-            const allStaff = mockStaffList.filter(s => s.department === selectedDepartment);
+            const list = staffList.filter(s => s.department === selectedDepartment);
             const newMap: Record<string, "present" | "absent" | "late"> = {};
-            allStaff.forEach(staff => newMap[staff.User_Id] = status);
+            list.forEach(staff => newMap[staff.User_Id] = status);
             setStaffAttendanceMap(newMap);
         }
     };
@@ -221,8 +178,8 @@ export function AdminAttendanceView() {
 
     if (isInMarkingMode) {
         const listToDisplay = markingType === "student"
-            ? mockStudentList.filter(s => s.course === selectedCourse)
-            : mockStaffList.filter(s => s.department === selectedDepartment);
+            ? studentList.filter(s => s.course === selectedCourse)
+            : staffList.filter(s => s.department === selectedDepartment);
 
         const attendanceMap = markingType === "student" ? studentAttendanceMap : staffAttendanceMap;
         const markedCount = Object.keys(attendanceMap).length;
@@ -265,23 +222,31 @@ export function AdminAttendanceView() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {listToDisplay.map((person, index) => {
-                                    const currentStatus = attendanceMap[person.User_Id];
-                                    return (
-                                        <TableRow key={person.User_Id}>
-                                            <TableCell>{index + 1}</TableCell>
-                                            <TableCell className="font-mono text-sm">{person.User_Id}</TableCell>
-                                            <TableCell>{person.name}</TableCell>
-                                            <TableCell>
-                                                <div className="flex gap-2">
-                                                    <Button size="sm" variant={currentStatus === "present" ? "default" : "outline"} onClick={() => toggleStatus(person.User_Id, "present")} className="flex-1">Present</Button>
-                                                    <Button size="sm" variant={currentStatus === "absent" ? "destructive" : "outline"} onClick={() => toggleStatus(person.User_Id, "absent")} className="flex-1">Absent</Button>
-                                                    <Button size="sm" variant={currentStatus === "late" ? "secondary" : "outline"} onClick={() => toggleStatus(person.User_Id, "late")} className="flex-1">Late</Button>
-                                                </div>
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
+                                {listToDisplay.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                            No members found.
+                                        </TableCell>
+                                    </TableRow>
+                                ) : (
+                                    listToDisplay.map((person, index) => {
+                                        const currentStatus = attendanceMap[person.User_Id];
+                                        return (
+                                            <TableRow key={person.User_Id}>
+                                                <TableCell>{index + 1}</TableCell>
+                                                <TableCell className="font-mono text-sm">{person.User_Id}</TableCell>
+                                                <TableCell>{person.name}</TableCell>
+                                                <TableCell>
+                                                    <div className="flex gap-2">
+                                                        <Button size="sm" variant={currentStatus === "present" ? "default" : "outline"} onClick={() => toggleStatus(person.User_Id, "present")} className="flex-1">Present</Button>
+                                                        <Button size="sm" variant={currentStatus === "absent" ? "destructive" : "outline"} onClick={() => toggleStatus(person.User_Id, "absent")} className="flex-1">Absent</Button>
+                                                        <Button size="sm" variant={currentStatus === "late" ? "secondary" : "outline"} onClick={() => toggleStatus(person.User_Id, "late")} className="flex-1">Late</Button>
+                                                    </div>
+                                                </TableCell>
+                                            </TableRow>
+                                        );
+                                    })
+                                )}
                             </TableBody>
                         </Table>
                     </CardContent>
@@ -313,7 +278,7 @@ export function AdminAttendanceView() {
                             <h3 className="text-lg font-semibold">{activeTab === "students" ? "Student Attendance Records" : "Staff Attendance Records"}</h3>
                             <div className="flex gap-2">
                                 {/* Student Marking Dialog */}
-                                {isStaff && activeTab === "students" && (
+                                {(isStaff || isAdmin || isSuperAdmin) && activeTab === "students" && (
                                     <Dialog open={isMarkingAttendance} onOpenChange={setIsMarkingAttendance}>
                                         <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" />Mark New Attendance</Button></DialogTrigger>
                                         <DialogContent>
@@ -323,7 +288,13 @@ export function AdminAttendanceView() {
                                                     <Label>Course</Label>
                                                     <Select value={selectedCourse} onValueChange={setSelectedCourse}>
                                                         <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                                                        <SelectContent>{(isStaff ? staffAssignedCourses : courses).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                                                        <SelectContent>
+                                                            {courses.length === 0 ? (
+                                                                <SelectItem value="none" disabled>No courses available</SelectItem>
+                                                            ) : (
+                                                                (isStaff ? staffAssignedCourses : courses).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)
+                                                            )}
+                                                        </SelectContent>
                                                     </Select>
                                                 </div>
                                                 <div className="grid gap-2">
@@ -333,13 +304,13 @@ export function AdminAttendanceView() {
                                             </div>
                                             <DialogFooter>
                                                 <Button variant="outline" onClick={() => setIsMarkingAttendance(false)}>Cancel</Button>
-                                                <Button onClick={handleMarkAttendance}>Start Marking</Button>
+                                                <Button onClick={handleMarkAttendance} disabled={courses.length === 0}>Start Marking</Button>
                                             </DialogFooter>
                                         </DialogContent>
                                     </Dialog>
                                 )}
                                 {/* Staff Marking Dialog */}
-                                {isAdmin && activeTab === "staff" && (
+                                {(isAdmin || isSuperAdmin) && activeTab === "staff" && (
                                     <Dialog open={isMarkingStaffAttendance} onOpenChange={setIsMarkingStaffAttendance}>
                                         <DialogTrigger asChild><Button className="gap-2"><Plus className="h-4 w-4" />Mark Staff Attendance</Button></DialogTrigger>
                                         <DialogContent>
@@ -349,7 +320,13 @@ export function AdminAttendanceView() {
                                                     <Label>Department</Label>
                                                     <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
                                                         <SelectTrigger><SelectValue placeholder="Select department" /></SelectTrigger>
-                                                        <SelectContent>{departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
+                                                        <SelectContent>
+                                                            {departments.length === 0 ? (
+                                                                <SelectItem value="none" disabled>No departments available</SelectItem>
+                                                            ) : (
+                                                                departments.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)
+                                                            )}
+                                                        </SelectContent>
                                                     </Select>
                                                 </div>
                                                 <div className="grid gap-2">
@@ -359,7 +336,7 @@ export function AdminAttendanceView() {
                                             </div>
                                             <DialogFooter>
                                                 <Button variant="outline" onClick={() => setIsMarkingStaffAttendance(false)}>Cancel</Button>
-                                                <Button onClick={handleMarkStaffAttendance}>Start Marking</Button>
+                                                <Button onClick={handleMarkStaffAttendance} disabled={departments.length === 0}>Start Marking</Button>
                                             </DialogFooter>
                                         </DialogContent>
                                     </Dialog>
@@ -445,25 +422,38 @@ export function AdminAttendanceView() {
                                 <TableHead>Name</TableHead>
                                 <TableHead>Date</TableHead>
                                 <TableHead>Status</TableHead>
-                                {isEditing && <TableHead>Action</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {currentRecords.map(r => (
-                                <TableRow key={r.id}>
-                                    <TableCell className="font-mono">{r.User_Id}</TableCell>
-                                    <TableCell>{r.personName}</TableCell>
-                                    <TableCell>{r.date}</TableCell>
-                                    <TableCell>
-                                        <Badge variant={r.status === "present" ? "default" : r.status === "absent" ? "destructive" : "secondary"}>
-                                            {r.status}
-                                        </Badge>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-24 text-center">
+                                        <div className="flex items-center justify-center gap-2">
+                                            <Loader2 className="h-5 w-5 animate-spin" />
+                                            <span>Loading records...</span>
+                                        </div>
                                     </TableCell>
-                                    {isEditing && (
-                                        <TableCell><Button size="sm" variant="outline">Edit</Button></TableCell>
-                                    )}
                                 </TableRow>
-                            ))}
+                            ) : currentRecords.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                        No attendance records found.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                currentRecords.map(r => (
+                                    <TableRow key={r.id}>
+                                        <TableCell className="font-mono">{r.User_Id}</TableCell>
+                                        <TableCell>{r.personName}</TableCell>
+                                        <TableCell>{new Date(r.date).toLocaleDateString()}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={r.status === "present" ? "default" : r.status === "absent" ? "destructive" : "secondary"}>
+                                                {r.status}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

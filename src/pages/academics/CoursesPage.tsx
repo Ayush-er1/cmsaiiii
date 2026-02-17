@@ -130,7 +130,7 @@ export function CoursesPage() {
   const getCourseStats = (courseId: string) => {
     return {
       totalStudents: 45,
-      avgAttendance: "88%",
+
       upcomingAssignments: 2,
       lastClassDate: "2024-03-20",
     };
