@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/lib/auth-context";
-import { Users, GraduationCap, BookOpen } from "lucide-react";
+import { Users, UserPlus } from "lucide-react";
 
 import { DashboardWelcomeBanner } from "@/components/features/dashboard/DashboardWelcomeBanner";
 import { DashboardStats } from "@/components/features/dashboard/DashboardStats";
@@ -14,10 +14,9 @@ import { Announcement, AnnouncementFormState } from "@/types/dashboard";
 
 // Initial stats with empty values
 const initialStats = [
-  { title: "Total Students", value: "0", icon: Users },
-  { title: "Active Programs", value: "0", icon: GraduationCap },
-  { title: "Courses", value: "0", icon: BookOpen },
   { title: "Total Users", value: "0", icon: Users },
+  { title: "Active Students", value: "0", icon: Users },
+  { title: "Staff Members", value: "0", icon: UserPlus },
 ];
 
 export function DashboardPage() {
@@ -47,12 +46,11 @@ export function DashboardPage() {
         const api = module.default;
         api.get("/dashboard")
           .then((response) => {
-            const { studentCount, courseCount, programCount } = response.data;
+            const { studentCount, userCount } = response.data;
             setDashboardStats((prev) =>
               prev.map((stat) => {
-                if (stat.title === "Total Students") return { ...stat, value: String(studentCount) };
-                if (stat.title === "Courses") return { ...stat, value: String(courseCount) };
-                if (stat.title === "Active Programs") return { ...stat, value: String(programCount) };
+                if (stat.title === "Active Students") return { ...stat, value: String(studentCount) };
+                if (stat.title === "Total Users") return { ...stat, value: String(userCount || studentCount) };
                 return stat;
               })
             );

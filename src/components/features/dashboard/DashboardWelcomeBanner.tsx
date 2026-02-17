@@ -11,10 +11,9 @@ interface DashboardWelcomeBannerProps {
 
 export function DashboardWelcomeBanner({ user }: DashboardWelcomeBannerProps) {
     const cleanName = user.name.replace(/^(Dr\.|Prof\.|Mr\.|Ms\.|Mrs\.)\s+/i, '').split(" ")[0];
-    const isStaff = user.role === "staff" || user.role === "teacher";
-
-    const ctaLabel = user.role === 'student' ? 'Check Attendance' : (isStaff ? 'Mark Attendance' : 'Manage Users');
-    const ctaLink = user.role === 'student' ? '/attendance' : (isStaff ? '/attendance' : '/users');
+    const isAdmin = user.role === 'admin' || user.role === 'super_admin';
+    const ctaLabel = isAdmin ? 'Manage Users' : 'View Profile';
+    const ctaLink = isAdmin ? '/users' : '/profile';
 
     return (
         <div className="bg-white dark:bg-card border border-[#243F76]/10 dark:border-white/10 rounded-xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 overflow-hidden relative">

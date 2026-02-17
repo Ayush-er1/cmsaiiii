@@ -9,23 +9,12 @@ import { UserProvider } from "@/lib/user-context";
 import { LoginPage } from "@/pages/auth/LoginPage";
 import { CallbackPage } from "@/pages/auth/CallbackPage";
 import { DashboardPage } from "@/pages/dashboard/DashboardPage";
-import { ProgramsPage } from "@/pages/academics/ProgramsPage";
-import { DepartmentsPage } from "@/pages/academics/DepartmentsPage";
-import { CoursesPage } from "@/pages/academics/CoursesPage";
 import { UsersPage } from "@/pages/administration/UsersPage";
 import { EnrollUserPage } from "@/pages/administration/EnrollUserPage";
 import { UserDetailsPage } from "@/pages/administration/UserDetailsPage";
 
-
-import { ClassRoutinePage } from "@/pages/academics/ClassRoutinePage";
 import { ProfilePage } from "@/pages/user/ProfilePage";
 import { ChangePasswordPage } from "@/pages/user/ChangePasswordPage";
-import { FeesPage } from "@/pages/student-services/FeesPage";
-// import { AdminFeesPage } from "@/pages/AdminFeesPage"; // Removed as it's unified
-import { AttendancePage } from "@/pages/student-services/AttendancePage";
-import { GroupsPage } from "@/pages/administration/GroupsPage";
-import { RolesPermissionsPage } from "@/pages/administration/RolesPermissionsPage";
-import { CalendarPage } from "@/pages/academics/CalendarPage";
 
 import NotFound from "@/pages/common/not-found";
 
@@ -72,15 +61,7 @@ function Router() {
       <Route path="/dashboard">
         <ProtectedRoute component={DashboardPage} permission="dashboard_view" />
       </Route>
-      <Route path="/programs">
-        <ProtectedRoute component={ProgramsPage} permission="programs_view" />
-      </Route>
-      <Route path="/departments">
-        <ProtectedRoute component={DepartmentsPage} permission="departments_manage" />
-      </Route>
-      <Route path="/courses">
-        <ProtectedRoute component={CoursesPage} permission="courses_view" />
-      </Route>
+
       <Route path="/users">
         <ProtectedRoute component={UsersPage} permission="users_view" />
       </Route>
@@ -94,31 +75,11 @@ function Router() {
         <ProtectedRoute component={UserDetailsPage} permission="users_view" />
       </Route>
 
-      <Route path="/attendance">
-        <ProtectedRoute component={AttendancePage} permission="attendance_view" />
-      </Route>
-      <Route path="/groups">
-        <ProtectedRoute component={GroupsPage} permission="groups_manage" />
-      </Route>
-      <Route path="/roles-permissions">
-        <ProtectedRoute component={RolesPermissionsPage} permission="permissions_manage" />
-      </Route>
-
-
-      <Route path="/fees">
-        <ProtectedRoute component={FeesPage} permission="fees_view" />
-      </Route>
-      <Route path="/class-routine">
-        <ProtectedRoute component={ClassRoutinePage} permission="routine_view" />
-      </Route>
       <Route path="/profile">
         <ProtectedRoute component={ProfilePage} permission="profile_view" />
       </Route>
       <Route path="/change-password">
         <ProtectedRoute component={ChangePasswordPage} permission="password_change" />
-      </Route>
-      <Route path="/calendar">
-        <ProtectedRoute component={CalendarPage} permission="calendar_view" />
       </Route>
 
       <Route component={NotFound} />

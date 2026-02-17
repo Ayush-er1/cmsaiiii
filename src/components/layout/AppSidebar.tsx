@@ -1,19 +1,8 @@
 import { useLocation, Link } from "wouter";
 import {
   LayoutDashboard,
-  GraduationCap,
   Users,
-  FileText,
-  User,
-  BookOpen,
-  ClipboardList,
-  Building2,
-  CalendarDays,
-  CreditCard,
-  Shield,
-  Lock,
-  UserCheck,
-  Clock,
+  GraduationCap,
 } from "lucide-react";
 import {
   Sidebar,
@@ -45,66 +34,10 @@ const navItems: NavItem[] = [
     permissionId: "dashboard_view",
   },
   {
-    title: "Academic Programs",
-    url: "/programs",
-    icon: GraduationCap,
-    permissionId: "programs_view",
-  },
-  {
-    title: "Departments",
-    url: "/departments",
-    icon: Building2,
-    permissionId: "departments_manage",
-  },
-  {
-    title: "Courses",
-    url: "/courses",
-    icon: BookOpen,
-    permissionId: "courses_view",
-  },
-  {
     title: "User Management",
     url: "/users",
     icon: Users,
     permissionId: "users_view",
-  },
-  {
-    title: "Groups & Orgs",
-    url: "/groups",
-    icon: Shield,
-    permissionId: "groups_manage",
-  },
-  {
-    title: "Access Control",
-    url: "/roles-permissions",
-    icon: Lock,
-    permissionId: "permissions_manage",
-  },
-  {
-    title: "Attendance",
-    url: "/attendance",
-    icon: UserCheck,
-    permissionId: "attendance_view",
-  },
-
-
-  {
-    title: "Class Routine",
-    url: "/class-routine",
-    icon: Clock,
-    permissionId: "routine_view",
-  },
-  {
-    title: "Fees",
-    url: "/fees",
-    icon: CreditCard,
-    permissionId: "fees_view",
-  },
-  {
-    title: "Academic Calendar",
-    url: "/calendar",
-    icon: CalendarDays,
-    permissionId: "calendar_view",
   },
 ];
 
